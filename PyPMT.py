@@ -339,5 +339,169 @@ def quivermc(x, y, u, v, scale, arrow, cmap=None, colorbarOn=False, units=''):
 # In[ ]:
 
 
+def thickness2freeboard(T, **kwargs):
+    """thickness2freeboard estimates freeboard height above sea level, from ice thickness 
+    assuming hyrostatic equilibrium. """
+    rhoi = kwargs.get('rhoi', 917)
+    rhow = kwargs.get('rhow', 1027)
+    rhos = kwargs.get('rhos', 350)
+    Ts = kwargs.get('Ts', 0)
+    F = (T + Ts * (rhow - rhos) / (rhow - rhoi)) / (rhow / (rhow - rhoi)) # perform the calculation
+    return round(F, 2)
 
+
+# In[ ]:
+
+
+def freeboard2thickness(F, **kwargs):
+    """freeboard2thickness estimates ice thickness from height above sea level,
+    assuming hyrostatic equilibrium. """
+    rhoi = kwargs.get('rhoi', 917)
+    rhow = kwargs.get('rhow', 1027)
+    rhos = kwargs.get('rhos', 350)
+    Ts = kwargs.get('Ts', 0)
+    T = (F * rhow / (rhow - rhoi)) - Ts * (rhow - rhos) / (rhow - rhoi)
+    return round(T, 2)
+
+
+# In[ ]:
+
+
+def base2freeboard(B, rhoi=917, rhow=1027, rhos=350, Ts=0):
+    """
+    Estimates freeboard height above sea level, from ice basal elevation,
+    assuming hydrostatic equilibrium.
+
+    Parameters:
+    B (float): Basal elevation of ice in meters.
+    rhoi (float): Ice density in kg/m^3. Default is 917 kg/m^3.
+    rhow (float): Water density in kg/m^3. Default is 1027 kg/m^3.
+    rhos (float): Snow density in kg/m^3. Default is 350 kg/m^3.
+    Ts (float): Snow thickness in meters. Default is 0 m.
+
+    Returns:
+    float: Freeboard height above sea level in meters.
+    """
+    F = (B - Ts * ((rhow - rhos) / (rhow - rhoi))) / (1 - rhow / (rhow - rhoi))
+
+    if F < 0:
+        return float("NaN")  # Assume any base elevations above sea level are error or rock
+    else:
+        return round(F, 2)
+
+
+# In[ ]:
+
+
+def contourfps(lat, lon, Z, levels=None, plot_km=False, meridian=0, cmap='viridis'):
+    # Convert lat, lon to polar stereographic coordinates
+    x, y = ll2ps(lat, lon)
+
+    # Convert to kilometers if user requested:
+    if plot_km:
+        x = x / 1000
+        y = y / 1000
+
+    # Create the contour plot
+    fig, ax = plt.subplots()
+    if levels is not None:
+        cs = ax.contourf(x, y, Z, levels=levels, cmap=cmap)
+    else:
+        cs = ax.contourf(x, y, Z, cmap=cmap)
+        
+    plt.colorbar(cs)
+
+    plt.show()
+
+
+# In[ ]:
+
+
+def contourps(lat, lon, Z, n=None, v=None, line_spec=None, plot_km=False, meridian=0):
+    # Convert lat, lon to polar stereographic coordinates
+    x, y = ll2ps(lat, lon)
+
+    # Convert to kilometers if requested:
+    if plot_km:
+        x = x / 1000
+        y = y / 1000
+
+    # Create the contour plot
+    fig, ax = plt.subplots()
+
+    if n is not None:
+        cs = ax.contour(x, y, Z, n)
+    elif v is not None:
+        cs = ax.contour(x, y, Z, v)
+    else:
+        cs = ax.contour(x, y, Z)
+    
+    if line_spec is not None:
+        for line in cs.collections:
+            line.set_linestyle(line_spec)
+
+    plt.show()
+    return cs
+
+
+# In[ ]:
+
+
+def find2drange(X, Y, xi, yi, extraIndices=(0, 0)):
+    assert np.issubdtype(X.dtype, np.number), 'X must be numeric.'
+    assert X.ndim <= 2, 'This function only works for 1D or 2D X and Y arrays.'
+    assert X.shape == Y.shape, 'X and Y must be the same exact size.'
+    assert np.issubdtype(xi.dtype, np.number), 'xi must be numeric.'
+    assert np.issubdtype(yi.dtype, np.number), 'yi must be numeric.'
+    
+    extrarows, extracols = extraIndices
+    assert extrarows >= 0, 'extrarows must be a positive integer.'
+    assert extracols >= 0, 'extracols must be a positive integer.'
+
+    rowsin, colsin = X.shape
+
+    if len(xi) == 0:
+        xi = [np.min(X), np.max(X)]
+    else:
+        xi = [np.min(xi), np.max(xi)]
+
+    if len(yi) == 0:
+        yi = [np.min(Y), np.max(Y)]
+    else:
+        yi = [np.min(yi), np.max(yi)]
+
+    rowi, coli = np.where((X >= xi[0]) & (X <= xi[1]) & (Y >= yi[0]) & (Y <= yi[1]))
+
+    rowrange = np.arange(np.min(rowi) - 1 - extrarows, np.max(rowi) + 2 + extrarows)
+    colrange = np.arange(np.min(coli) - 1 - extracols, np.max(coli) + 2 + extracols)
+
+    rowrange = rowrange[(rowrange >= 0) & (rowrange < rowsin)]
+    colrange = colrange[(colrange >= 0) & (colrange < colsin)]
+
+    return rowrange, colrange
+
+
+# In[ ]:
+
+
+def geoquadps(latlim, lonlim, meridian=0, plotkm=False, **kwargs):
+    assert len(latlim) == 2 and len(lonlim) == 2, "Error: latlim and lonlim must each be two-element arrays."
+    assert all(-90 <= lat <= 90 for lat in latlim) and all(-180 <= lon <= 180 for lon in lonlim), "Error: latlim and lonlim must be geographic coordinates."
+
+    if np.diff(lonlim) < 0:
+        lonlim[1] = lonlim[1] + 360
+
+    lat = np.concatenate((np.linspace(latlim[0], latlim[0], 200), np.linspace(latlim[1], latlim[1], 200), [latlim[0]]))
+    lon = np.concatenate((np.linspace(lonlim[0], lonlim[1], 200), np.linspace(lonlim[1], lonlim[0], 200), [lonlim[0]]))
+
+    x, y = ll2ps(lat, lon)
+
+    if plotkm:
+        x = x / 1000
+        y = y / 1000
+
+    h = plt.plot(x, y, **kwargs)
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    return h
 
