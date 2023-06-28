@@ -556,28 +556,35 @@ def geoquadps(latlim, lonlim, meridian=0, plotkm=False, **kwargs):
     return h
 
 
-def psgrid(center_lat = None, center_lon = None, w_km = None, r_km = None, stereographic = False):
-        if isinstance(center_lat,(float,int,np.ndarray)):
+def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereographic = False):
+        if isinstance(CenterLat,(float,int,np.ndarray)):
 
-            #print("hello") 
-            if isinstance(center_lat,(float,int)):
-                center_lat = np.array([center_lat])
+             
+            if isinstance(CenterLat,(float,int)):
+                CenterLat = np.array([CenterLat])
             
-            if isinstance(center_lon,(float,int)):
-                center_lon = np.array([center_lon])
+            if isinstance(CenterLon,(float,int)):
+                CenterLon = np.array([CenterLon])
             
-            if islatlon(center_lat,center_lon):
-                [centerx,centery] = ll2ps(center_lat, center_lon)
+            if islatlon(CenterLat,CenterLon):
+                [centerx,centery] = ll2ps(CenterLat,CenterLon)
             else:
-                centerx = center_lat
-                centery = center_lon
-            width_km = w_km
-            resolution_km = r_km
-            #print("hello2")
+                centerx = CenterLat
+                centery = CenterLon
+                
+            width_km= w_km
+            resolution_km =r_km
+           
         else:
-            [centerx,centery] = scarloc(center_lat,'xy')
-            width_km = w_km
-            resolution_km = r_km
+            [centerx,centery] = scarloc(CenterLat,'xy')
+            width_km= w_km
+            resolution_km =r_km
+            
+        if isinstance (width_km,(float,int)):
+            width_km = [width_km]
+            
+        if isinstance (resolution_km,(float,int)):
+            resolution_km = [resolution_km]
             
         if len(width_km) == 1:
             widthx = width_km[0]*1000 # The *1000 bit converts from km to meters. 
@@ -588,7 +595,7 @@ def psgrid(center_lat = None, center_lon = None, w_km = None, r_km = None, stere
             widthy = width_km[1]*1000
         else:
             raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid width with more than two elements. Check inputs and try again.")
-            ##section above was completed previously
+           
         
         if len(resolution_km) == 1:
             resx = resolution_km[0]*1000
@@ -625,11 +632,11 @@ def psgrid(center_lat = None, center_lon = None, w_km = None, r_km = None, stere
             out2 = Y
             
         else:
-            print(X,Y) 
-            out1, out2 = ps2ll(X, Y) #potential issue with ps211 function- not taking vector input
+            out1, out2 = ps2ll(X, Y)
 
         return out1, out2
-
-
-psgrid(-75,-107,[600],[5])    # input for testing function        
+    
+#test functions ps grid:
+#psgrid(-75,-107,600,5)    
+#psgrid('amery ice shelf',w_km = [900,250],r_km = 10,stereographic = 'xy')            
  
