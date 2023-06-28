@@ -505,3 +505,79 @@ def geoquadps(latlim, lonlim, meridian=0, plotkm=False, **kwargs):
 
     return h
 
+def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereographic = False):
+        if isinstance(CenterLat,(float,int,np.ndarray)):
+
+            #print("hello") 
+            if isinstance(CenterLat,(float,int)):
+                CenterLat = np.array([CenterLat])
+            
+            if isinstance(CenterLon,(float,int)):
+                CenterLon = np.array([CenterLon])
+            
+            if islatlon(CenterLat,CenterLon):
+                [centerx,centery] = ll2ps(CenterLat,CenterLon)
+            else:
+                centerx = CenterLat
+                centery = CenterLon
+            width_km= w_km
+            resolution_km =r_km
+            #print("hello2") 
+        else:
+            [centerx,centery] = scarloc(CenterLat,'xy')
+            width_km= w_km
+            resolution_km =r_km
+            
+        if len(width_km) == 1:
+            widthx = width_km[0]*1000 # The *1000 bit converts from km to meters. 
+            widthy = width_km[0]*1000
+            
+        elif len(width_km) == 2:
+            widthx = width_km[0]*1000 
+            widthy = width_km[1]*1000
+        else:
+            raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid width with more than two elements. Check inputs and try again.")
+            ##section above was completed previously
+        
+        if len(resolution_km) == 1:
+            resx = resolution_km[0]*1000
+            resy = resolution_km[0]*1000
+        
+        elif len(resolution_km) == 2:
+            resx = resolution_km[0]*1000
+            rexy = resolution_km[1]*1000
+        else: 
+            raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid resolution with more than two elements. Check inputs and try again.") 
+            
+
+        # Verify that resolution is not greater than width
+        assert widthx > resx, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
+        assert widthy > resy, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
+        assert resx > 0, "Grid resolution must be greater than zero."
+        assert resy > 0, "Grid resolution must be greater than zero."
+        assert widthx > 0, "Grid width must be greater than zero."
+        assert widthy > 0, "Grid width must be greater than zero."
+
+        # Should outputs be polar stereographic?
+
+        outputps = (stereographic == 'xy')
+
+        # Build grid
+        x = np.arange(centerx - widthx/2, centerx + widthx/2 + resx, resx)
+        y = np.arange(centery - widthy/2, centery + widthy/2 + resy, resy)
+        X, Y = np.meshgrid(x, y)
+    
+
+        # Convert coordinates if necessary
+        if outputps:
+            out1 = X
+            out2 = Y
+            
+        else:
+            print(X,Y) 
+            out1, out2 = ps2ll(X, Y) #potential issue with ps211 function- not taking vector input
+
+        return out1, out2
+    
+psgrid(-75,-107,[600],[5])    # input for testing function        
+ 
