@@ -3,7 +3,6 @@
 
 # In[ ]:
 
-
 import numpy as np
 from random import choice, seed
 import math
@@ -16,6 +15,43 @@ import matplotlib.colors as mcolors
 
 
 # In[ ]:
+
+
+def load_csv_data(filename):
+    lat = []
+    lon = []
+    names = []
+
+    with open(filename, 'r', encoding='utf-8') as csvfile:
+        csvreader = csv.reader(csvfile)
+        next(csvreader)  # Skip header row
+
+        for row in csvreader:
+            try:
+                lat_val = float(row[5])
+                lon_val = float(row[6])
+                lat.append(lat_val)
+                lon.append(lon_val)
+                names.append(row[1])
+            except ValueError:
+                continue
+
+    return np.array(lat), np.array(lon), np.array(names)
+
+
+def strlookup(featurename, names):
+    featurename = featurename.lower()  # Convert featurename to lowercase for case-insensitive matching
+
+    indices = [i for i, name in enumerate(names) if featurename in name.lower()]
+
+    if len(indices) > 0:
+        x = indices[0]  # Choose the first matching index
+        NearbyNames = [names[i] for i in indices]  # Get all matching names
+    else:
+        x = None
+        NearbyNames = []
+
+    return x, NearbyNames
 
 
 def scarloc(featurename, *varargin):
@@ -201,44 +237,58 @@ def ll2ps(lat, lon):
 
 def ps2ll(x, y, **kwargs):
     # Define default values for optional keyword arguments
-    phi_c = -71  # degrees
-    a = 6378137.0  # meters
-    e = 0.08181919
-    lambda_0 = 0  # degrees
+    phi_c = -71  # standard parallel (degrees)
+    a = 6378137.0  # radius of ellipsoid, WGS84 (meters)
+    e = 0.08181919  # eccentricity, WGS84
+    lambda_0 = 0  # meridian along positive Y axis (degrees)
 
     # Parse optional keyword arguments
     for key, value in kwargs.items():
-        if key == 'TrueLat':
+        if key.lower() == 'true_lat':
             phi_c = value
-        elif key == 'EarthRadius':
+            assert isinstance(phi_c, (int, float)), 'True lat must be a scalar.'
+            if phi_c > 0:
+                print("I'm assuming you forgot the negative sign for the true latitude, \
+                      and I am converting your northern hemisphere value to southern hemisphere.")
+                phi_c = -phi_c
+        elif key.lower() == 'earth_radius':
             a = value
-        elif key == 'Eccentricity':
+            assert isinstance(a, (int, float)), 'Earth radius must be a scalar.'
+            assert a > 7e+3, 'Earth radius should be something like 6378137 in meters.'
+        elif key.lower() == 'eccentricity':
             e = value
-        elif key == 'meridian':
+            assert isinstance(e, (int, float)), 'Earth eccentricity must be a scalar.'
+            assert 0 <= e < 1, 'Earth eccentricity does not seem like a reasonable value.'
+        elif key.lower() == 'meridian':
             lambda_0 = value
+            assert isinstance(lambda_0, (int, float)), 'meridian must be a scalar.'
+            assert -180 <= lambda_0 <= 360, 'meridian does not seem like a logical value.'
+        else:
+            print("At least one of your input arguments is invalid. Please try again.")
+            return 0
 
     # Convert to radians and switch signs
-    phi_c = -phi_c * math.pi / 180
-    lambda_0 = -lambda_0 * math.pi / 180
+    phi_c = -phi_c * np.pi / 180
+    lambda_0 = -lambda_0 * np.pi / 180
     x = -x
     y = -y
 
     # Calculate constants
-    t_c = math.tan(math.pi / 4 - phi_c / 2) / ((1 - e * math.sin(phi_c)) / (1 + e * math.sin(phi_c))) ** (e / 2)
-    m_c = math.cos(phi_c) / math.sqrt(1 - e ** 2 * (math.sin(phi_c)) ** 2)
+    t_c = np.tan(np.pi / 4 - phi_c / 2) / ((1 - e * np.sin(phi_c)) / (1 + e * np.sin(phi_c))) ** (e / 2)
+    m_c = np.cos(phi_c) / np.sqrt(1 - e ** 2 * (np.sin(phi_c)) ** 2)
 
     # Calculate rho and t
     rho = np.sqrt(x ** 2 + y ** 2)
     t = rho * t_c / (a * m_c)
 
     # Calculate chi
-    chi = math.pi / 2 - 2 * math.atan(t)
+    chi = np.pi / 2 - 2 * np.arctan(t)
 
     # Calculate lat
-    lat = chi + (e ** 2 / 2 + 5 * e ** 4 / 24 + e ** 6 / 12 + 13 * e ** 8 / 360) * math.sin(2 * chi) \
-          + (7 * e ** 4 / 48 + 29 * e ** 6 / 240 + 811 * e ** 8 / 11520) * math.sin(4 * chi) \
-          + (7 * e ** 6 / 120 + 81 * e ** 8 / 1120) * math.sin(6 * chi) \
-          + (4279 * e ** 8 / 161280) * math.sin(8 * chi)
+    lat = chi + (e ** 2 / 2 + 5 * e ** 4 / 24 + e ** 6 / 12 + 13 * e ** 8 / 360) * np.sin(2 * chi) \
+          + (7 * e ** 4 / 48 + 29 * e ** 6 / 240 + 811 * e ** 8 / 11520) * np.sin(4 * chi) \
+          + (7 * e ** 6 / 120 + 81 * e ** 8 / 1120) * np.sin(6 * chi) \
+          + (4279 * e ** 8 / 161280) * np.sin(8 * chi)
 
     # Calculate lon
     lon = lambda_0 + np.arctan2(x, -y)
@@ -246,17 +296,17 @@ def ps2ll(x, y, **kwargs):
     # Correct the signs and phasing
     lat = -lat
     lon = -lon
-    lon = (lon + math.pi) % (2 * math.pi) - math.pi
+    lon = (lon + np.pi) % (2 * np.pi) - np.pi
 
     # Convert back to degrees
-    lat = lat * 180 / math.pi
-    lon = lon * 180 / math.pi
+    lat = lat * 180 / np.pi
+    lon = lon * 180 / np.pi
 
     # Make two-column format if user requested no outputs
     if 'nargout' in kwargs and kwargs['nargout'] == 0:
         return np.column_stack((lat, lon))
 
-    return round(lat, 4), round(lon, 4)
+    return np.round(lat, 4), np.round(lon, 4)
 
 
 # In[ ]:
@@ -505,28 +555,29 @@ def geoquadps(latlim, lonlim, meridian=0, plotkm=False, **kwargs):
 
     return h
 
-def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereographic = False):
-        if isinstance(CenterLat,(float,int,np.ndarray)):
+
+def psgrid(center_lat = None, center_lon = None, w_km = None, r_km = None, stereographic = False):
+        if isinstance(center_lat,(float,int,np.ndarray)):
 
             #print("hello") 
-            if isinstance(CenterLat,(float,int)):
-                CenterLat = np.array([CenterLat])
+            if isinstance(center_lat,(float,int)):
+                center_lat = np.array([center_lat])
             
-            if isinstance(CenterLon,(float,int)):
-                CenterLon = np.array([CenterLon])
+            if isinstance(center_lon,(float,int)):
+                center_lon = np.array([center_lon])
             
-            if islatlon(CenterLat,CenterLon):
-                [centerx,centery] = ll2ps(CenterLat,CenterLon)
+            if islatlon(center_lat,center_lon):
+                [centerx,centery] = ll2ps(center_lat, center_lon)
             else:
-                centerx = CenterLat
-                centery = CenterLon
-            width_km= w_km
-            resolution_km =r_km
-            #print("hello2") 
+                centerx = center_lat
+                centery = center_lon
+            width_km = w_km
+            resolution_km = r_km
+            #print("hello2")
         else:
-            [centerx,centery] = scarloc(CenterLat,'xy')
-            width_km= w_km
-            resolution_km =r_km
+            [centerx,centery] = scarloc(center_lat,'xy')
+            width_km = w_km
+            resolution_km = r_km
             
         if len(width_km) == 1:
             widthx = width_km[0]*1000 # The *1000 bit converts from km to meters. 
@@ -578,6 +629,7 @@ def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereograp
             out1, out2 = ps2ll(X, Y) #potential issue with ps211 function- not taking vector input
 
         return out1, out2
-    
+
+
 psgrid(-75,-107,[600],[5])    # input for testing function        
  
