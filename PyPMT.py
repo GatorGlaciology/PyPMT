@@ -212,22 +212,30 @@ def handle_missing_feature(featurename, NearbyNames):
 # In[ ]:
 
 
-def ll2ps(lat, lon):
-    # Define the projection parameters
-    proj_params = {
-        'proj': 'stere',
-        'lat_0': 90, # suitable for the southern hemisphere
-        'lon_0': 0,
-        'lat_ts': -71,
-        'a': 6378137,
-        'b': 6356752.3
-    }
+def ll2ps(lat, lon, **kwargs):
+    # Set default values
+    phi_c = kwargs.get('TrueLat', -71)
+    a = kwargs.get('EarthRadius', 6378137.0)
+    e = kwargs.get('Eccentricity', 0.08181919)
+    lambda_0 = kwargs.get('meridian', 0)
 
-    # Create the projection object
-    proj = pyproj.Proj(proj_params)
+    # Convert degrees to radians
+    lat_rad = np.deg2rad(lat)
+    lon_rad = np.deg2rad(lon)
+    lambda_0_rad = np.deg2rad(lambda_0)
+    phi_c_rad = np.deg2rad(phi_c)
 
-    # Convert latitude and longitude to polar stereographic coordinates
-    x, y = proj(lon, lat)
+    # Calculate m and t values
+    m_c = np.cos(phi_c_rad) / np.sqrt(1 - e ** 2 * (np.sin(phi_c_rad) ** 2))
+    t_c = np.tan(np.pi / 4 - phi_c_rad / 2) / ((1 - e * np.sin(phi_c_rad)) / (1 + e * np.sin(phi_c_rad))) ** (e / 2)
+    t = np.tan(np.pi / 4 - lat_rad / 2) / ((1 - e * np.sin(lat_rad)) / (1 + e * np.sin(lat_rad))) ** (e / 2)
+
+    # Calculate rho value
+    rho = a * m_c * t_c / t
+
+    # Calculate x and y
+    x = rho * np.sin(lon_rad - lambda_0_rad)
+    y = rho * np.cos(lon_rad - lambda_0_rad)
 
     return x, y
 
@@ -557,86 +565,110 @@ def geoquadps(latlim, lonlim, meridian=0, plotkm=False, **kwargs):
 
 
 def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereographic = False):
-        if isinstance(CenterLat,(float,int,np.ndarray)):
+    if isinstance(CenterLat,(float,int,np.ndarray)):
 
-             
-            if isinstance(CenterLat,(float,int)):
-                CenterLat = np.array([CenterLat])
-            
-            if isinstance(CenterLon,(float,int)):
-                CenterLon = np.array([CenterLon])
-            
-            if islatlon(CenterLat,CenterLon):
-                [centerx,centery] = ll2ps(CenterLat,CenterLon)
-            else:
-                centerx = CenterLat
-                centery = CenterLon
-                
-            width_km= w_km
-            resolution_km =r_km
-           
+
+        if isinstance(CenterLat,(float,int)):
+            CenterLat = np.array([CenterLat])
+
+        if isinstance(CenterLon,(float,int)):
+            CenterLon = np.array([CenterLon])
+
+        if islatlon(CenterLat,CenterLon):
+            [centerx,centery] = ll2ps(CenterLat,CenterLon)
         else:
-            [centerx,centery] = scarloc(CenterLat,'xy')
-            width_km= w_km
-            resolution_km =r_km
-            
-        if isinstance (width_km,(float,int)):
-            width_km = [width_km]
-            
-        if isinstance (resolution_km,(float,int)):
-            resolution_km = [resolution_km]
-            
-        if len(width_km) == 1:
-            widthx = width_km[0]*1000 # The *1000 bit converts from km to meters. 
-            widthy = width_km[0]*1000
-            
-        elif len(width_km) == 2:
-            widthx = width_km[0]*1000 
-            widthy = width_km[1]*1000
-        else:
-            raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid width with more than two elements. Check inputs and try again.")
-           
-        
-        if len(resolution_km) == 1:
-            resx = resolution_km[0]*1000
-            resy = resolution_km[0]*1000
-        
-        elif len(resolution_km) == 2:
-            resx = resolution_km[0]*1000
-            rexy = resolution_km[1]*1000
-        else: 
-            raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid resolution with more than two elements. Check inputs and try again.") 
-            
+            centerx = CenterLat
+            centery = CenterLon
 
-        # Verify that resolution is not greater than width
-        assert widthx > resx, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
-        assert widthy > resy, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
-        assert resx > 0, "Grid resolution must be greater than zero."
-        assert resy > 0, "Grid resolution must be greater than zero."
-        assert widthx > 0, "Grid width must be greater than zero."
-        assert widthy > 0, "Grid width must be greater than zero."
+        width_km= w_km
+        resolution_km =r_km
 
-        # Should outputs be polar stereographic?
+    else:
+        [centerx,centery] = scarloc(CenterLat,'xy')
+        width_km= w_km
+        resolution_km =r_km
 
-        outputps = (stereographic == 'xy')
+    if isinstance(width_km,(float,int)):
+        width_km = [width_km]
 
-        # Build grid
-        x = np.arange(centerx - widthx/2, centerx + widthx/2 + resx, resx)
-        y = np.arange(centery - widthy/2, centery + widthy/2 + resy, resy)
-        X, Y = np.meshgrid(x, y)
-    
-
-        # Convert coordinates if necessary
-        if outputps:
-            out1 = X
-            out2 = Y
+    if isinstance(resolution_km,(float,int)):
+        resolution_km = [resolution_km]
             
-        else:
-            out1, out2 = ps2ll(X, Y)
+    if len(width_km) == 1:
+        widthx = width_km[0]*1000 # The *1000 bit converts from km to meters.
+        widthy = width_km[0]*1000
 
-        return out1, out2
-    
-#test functions ps grid:
-#psgrid(-75,-107,600,5)    
-#psgrid('amery ice shelf',w_km = [900,250],r_km = 10,stereographic = 'xy')            
+    elif len(width_km) == 2:
+        widthx = width_km[0]*1000
+        widthy = width_km[1]*1000
+    else:
+        raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid width with more than two elements. Check inputs and try again.")
+
+    if len(resolution_km) == 1:
+        resx = resolution_km[0]*1000
+        resy = resolution_km[0]*1000
+
+    elif len(resolution_km) == 2:
+        resx = resolution_km[0]*1000
+        rexy = resolution_km[1]*1000
+    else:
+        raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid resolution with more than two elements. Check inputs and try again.")
+
+    # Verify that resolution is not greater than width
+    assert widthx > resx, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
+    assert widthy > resy, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
+    assert resx > 0, "Grid resolution must be greater than zero."
+    assert resy > 0, "Grid resolution must be greater than zero."
+    assert widthx > 0, "Grid width must be greater than zero."
+    assert widthy > 0, "Grid width must be greater than zero."
+
+    # Should outputs be polar stereographic?
+
+    outputps = (stereographic == 'xy')
+
+    # Build grid
+    x = np.arange(centerx - widthx/2, centerx + widthx/2 + resx, resx)
+    y = np.arange(centery - widthy/2, centery + widthy/2 + resy, resy)
+    X, Y = np.meshgrid(x, y)
+
+    # Convert coordinates if necessary
+    if outputps:
+        out1 = X
+        out2 = Y
+
+    else:
+        out1, out2 = ps2ll(X, Y)
+
+    return out1, out2
+
+
+def uv2vxvy(lat_or_x, lon_or_y, u, v):
+    # Convert inputs to numpy arrays if they are not already
+    lat_or_x = np.array(lat_or_x) if not isinstance(lat_or_x, np.ndarray) else lat_or_x
+    lon_or_y = np.array(lon_or_y) if not isinstance(lon_or_y, np.ndarray) else lon_or_y
+    u = np.array(u) if not isinstance(u, np.ndarray) else u
+    v = np.array(v) if not isinstance(v, np.ndarray) else v
+
+    # Input checks
+    assert isinstance(lat_or_x, (int, float, np.ndarray)), 'All inputs for uv2vxvy must be numeric.'
+    assert isinstance(lon_or_y, (int, float, np.ndarray)), 'All inputs for uv2vxvy must be numeric.'
+    assert isinstance(u, (int, float, np.ndarray)), 'All inputs for uv2vxvy must be numeric.'
+    assert isinstance(v, (int, float, np.ndarray)), 'All inputs for uv2vxvy must be numeric.'
+    assert np.shape(lat_or_x) == np.shape(lon_or_y) == np.shape(u) == np.shape(
+        v), 'All inputs to uv2vxvy must be of equal dimensions.'
+
+    # Parse inputs
+    if islatlon(lat_or_x, lon_or_y):
+        lon = lon_or_y  # lat is really just a placeholder to make the function a little more intuitive to use. It is not necessary for calculation.
+    else:
+        _, lon = ps2ll(lat_or_x, lon_or_y)
+
+    # Convert lon to radians
+    lon_rad = np.deg2rad(lon)
+
+    # Perform calculation
+    vx = u * np.cos(lon_rad) + v * np.sin(lon_rad)
+    vy = -u * np.sin(lon_rad) + v * np.cos(lon_rad)
+
+    return vx, vy
  
