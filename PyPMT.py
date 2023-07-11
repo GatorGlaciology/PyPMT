@@ -12,7 +12,7 @@ import pyproj
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.colors as mcolors
-
+from geopy.distance import geodesic
 
 # In[ ]:
 
@@ -671,4 +671,58 @@ def uv2vxvy(lat_or_x, lon_or_y, u, v):
     vy = -u * np.sin(lon_rad) + v * np.cos(lon_rad)
 
     return vx, vy
- 
+
+
+def pathdist(lat, lon, units='m', track='gc', refpoint=None):
+    assert len(lat) == len(lon), 'Length of lat and lon must match.'
+    assert len(lat) > 1, 'lat and lon must have more than one point.'
+
+    # Check if reference point is defined:
+    if refpoint is not None:
+        assert len(
+            refpoint) == 2, 'Coordinates of reference point can be only a single point given by a latitude/longitude pair in the form [reflat reflon].'
+
+    # Convert units to geopy format
+    if units in ['m', 'meter(s)', 'metre(s)']:
+        units = 'meters'
+    elif units in ['km', 'kilometer(s)', 'kilometre(s)']:
+        units = 'kilometers'
+    elif units in ['nm', 'naut mi', 'nautical mile(s)']:
+        units = 'nautical'
+    elif units in ['ft', 'international ft', 'foot', 'international foot', 'feet', 'international feet']:
+        units = 'feet'
+    elif units in ['in', 'inch', 'inches']:
+        units = 'inches'
+    elif units in ['yd', 'yds', 'yard(s)']:
+        units = 'yards'
+    elif units in ['mi', 'mile(s)', 'international mile(s)']:
+        units = 'miles'
+
+    # Initialize path distance
+    path_distance = [0]
+    ref_distance = 0
+
+    # Calculate distance between each pair of points
+    for i in range(1, len(lat)):
+        start_point = (lat[i - 1], lon[i - 1])
+        end_point = (lat[i], lon[i])
+
+        # Calculate the geodesic distance between the points
+        distance = geodesic(start_point, end_point).meters
+
+        # If this is the reference point, update the reference distance
+        if refpoint is not None and (lat[i - 1], lon[i - 1]) == tuple(refpoint):
+            ref_distance = sum(path_distance)
+
+        # If units are not meters, convert distance to specified units
+        if units != 'meters':
+            if units == 'kilometers':
+                distance = distance / 1000
+            elif units == 'miles':
+                distance = distance / 1609.34  # 1 mile is approximately 1609.34 meters
+            elif units == 'feet':
+                distance = distance / 0.3048  # 1 foot is approximately 0.3048 meters
+
+        # Add the distance to the previous cumulative distance
+        path_distance.append(path_distance[-1] + distance - ref_distance)
+    return path_distance
