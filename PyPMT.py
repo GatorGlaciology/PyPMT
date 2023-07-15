@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.colors as mcolors
 from geopy.distance import geodesic
+from pyproj import CRS, Transformer
+from scipy.spatial.distance import pdist, squareform
+from scipy.interpolate import interp1d
 
 # In[ ]:
 
@@ -254,7 +257,8 @@ def ps2ll(x, y, **kwargs):
     for key, value in kwargs.items():
         if key.lower() == 'true_lat':
             phi_c = value
-            assert isinstance(phi_c, (int, float)), 'True lat must be a scalar.'
+            if not np.isscalar(phi_c):
+                raise ValueError('True lat must be a scalar.')
             if phi_c > 0:
                 print("I'm assuming you forgot the negative sign for the true latitude, \
                       and I am converting your northern hemisphere value to southern hemisphere.")
@@ -726,3 +730,113 @@ def pathdist(lat, lon, units='m', track='gc', refpoint=None):
         # Add the distance to the previous cumulative distance
         path_distance.append(path_distance[-1] + distance - ref_distance)
     return path_distance
+
+
+def inpsquad(lat, lon, latlim, lonlim, inclusive=False):
+    assert np.array(lat.shape) == np.array(lon.shape), 'Inputs lat and lon must be the same size.'
+    assert np.array(latlim.shape) == np.array(
+        lonlim.shape), 'Inputs latlim_or_xlim and lonlim_or_ylim must be the same size.'
+    assert len(latlim) > 1, 'latlim or xlim must have more than one point.'
+
+    min_lat, max_lat = min(latlim), max(latlim)
+    min_lon, max_lon = min(lonlim), max(lonlim)
+
+    IN = np.logical_and(lat >= min_lat, lat <= max_lat)
+    IN = np.logical_and(IN, lon >= min_lon)
+    IN = np.logical_and(IN, lon <= max_lon)
+
+    return IN
+
+
+def psdistortion(lat, true_lat=-71):
+    assert np.all(np.abs(lat) <= 90), 'Error: inputs must be latitudes.'
+    assert np.isscalar(true_lat), 'Error: true_lat must be a scalar.'
+    assert np.abs(true_lat) <= 90, 'Error: true_lat must be in the range -90 to 90.'
+
+    lat = np.radians(lat)  # convert from degrees to radians
+    true_lat = np.radians(true_lat)  # same for true_lat
+
+    # calculate map scale factor
+    m = (1 + np.sin(np.abs(true_lat))) / (1 + np.sin(np.abs(lat)))
+    return m
+
+
+def pathdistps(lat_or_x, lon_or_y, *args):
+    # Initialize variables
+    lat_or_x = np.array(lat_or_x)
+    lon_or_y = np.array(lon_or_y)
+    kmout = False
+    ref = False
+    refcoord = None
+
+    # Parse optional arguments
+    for arg in args:
+        if arg == 'km':
+            kmout = True
+        elif isinstance(arg, list) and len(arg) == 2:
+            ref = True
+            refcoord = arg
+
+    # Convert geo coordinates to polar stereographic if necessary
+    if islatlon(lat_or_x, lon_or_y):
+        lat = lat_or_x
+        [x, y] = ll2ps(lat_or_x, lon_or_y)
+    else:
+        x = lat_or_x
+        y = lon_or_y
+        lat, _ = ps2ll(x, y) #don't need lon
+
+    # Perform mathematics:
+    m = psdistortion(lat[1:])  # Assuming psdistortion is defined or imported
+
+    # Cumulative sum of distances:
+    d = np.zeros_like(x)
+    d[1:] = np.cumsum(np.hypot(np.diff(x)/m, np.diff(y)/m))
+
+    # Reference to a location
+    if ref and refcoord is not None:
+        transformer = Transformer.from_crs("EPSG:4326", "EPSG:3031")
+        ref_x, ref_y = transformer.transform(refcoord[0], refcoord[1])
+        dist_to_refpoint = np.hypot(x - ref_x, y - ref_y)
+        min_dist_index = np.argmin(dist_to_refpoint)
+        d = d - d[min_dist_index]
+
+    # Convert to kilometers if user wants it that way
+    if kmout:
+        d = d / 1000
+
+    return d
+
+
+def pspath(lat_or_x, lon_or_y, spacing, method='linear'):
+    assert isinstance(lat_or_x, np.ndarray) and lat_or_x.ndim == 1, 'Input error: input coordinates must be vectors of matching dimensions.'
+    assert lat_or_x.shape == lon_or_y.shape, 'Input error: dimensions of input coordinates must match.'
+    assert np.isscalar(spacing), 'Input error: spacing must be a scalar.'
+
+    geoin = islatlon(lat_or_x, lon_or_y)
+    if geoin:
+        x, y = ll2ps(lat_or_x, lon_or_y)
+    else:
+        x = lat_or_x
+        y = lon_or_y
+
+    d = pathdistps(x, y)
+
+    # Create interpolation function based on method
+    func_x = interp1d(d, x, kind=method, fill_value="extrapolate")
+    func_y = interp1d(d, y, kind=method, fill_value="extrapolate")
+
+    # Generate equally spaced array from 0 to max(d)
+    d_new = np.arange(0, d[-1], spacing)
+
+    xi = func_x(d_new)
+    yi = func_y(d_new)
+
+    # Convert to geo coordinates if inputs were geo coordinates
+    if geoin:
+        out1, out2 = ps2ll(xi, yi)
+    else:
+        out1 = xi
+        out2 = yi
+
+    return out1, out2
