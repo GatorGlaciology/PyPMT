@@ -16,6 +16,9 @@ from geopy.distance import geodesic
 from pyproj import CRS, Transformer
 from scipy.spatial.distance import pdist, squareform
 from scipy.interpolate import interp1d
+from shapely import MultiPoint
+from shapely.geometry import LineString
+from shapely.ops import shared_paths
 
 # In[ ]:
 
@@ -840,3 +843,92 @@ def pspath(lat_or_x, lon_or_y, spacing, method='linear'):
         out2 = yi
 
     return out1, out2
+
+
+def pathcrossingps71(lat1, lon1, lat2, lon2, clip_option=None):
+    assert isinstance(lat1, list) and all(isinstance(i, float) for i in lat1), 'Input lat1 must be a list of floats.'
+    assert len(lat1) == len(lon1), 'Input lat1 and lon1 must be the same size.'
+    assert isinstance(lat2, list) and all(isinstance(i, float) for i in lat2), 'Input lat2 must be a list of floats.'
+    assert len(lat2) == len(lon2), 'Input lat2 and lon2 must be the same size.'
+
+    clip_data = True
+    if clip_option is not None:
+        if clip_option.lower().startswith('no') or clip_option.lower() == 'off':
+            clip_data = False
+
+    # Transform to polar stereo coordinates with standard parallel at 71 S
+    # Here we assume that ll2ps and ps2ll are already defined functions
+    x1, y1 = ll2ps(lat1, lon1)
+    x2, y2 = ll2ps(lat2, lon2)
+
+    # Delete faraway points before performing InterX function for large data sets
+    # This part of code is omitted for brevity and because it is an optimization
+    if clip_data:
+        if len(x1) * len(x2) > 1e6:
+            for _ in range(2):
+                stdx1 = np.std(np.diff(x1))
+                stdy1 = np.std(np.diff(y1))
+                stdx2 = np.std(np.diff(x2))
+                stdy2 = np.std(np.diff(y2))
+                x1, y1 = clip_outliers(x1, y1, x2, stdy1, 'x')
+                x2, y2 = clip_outliers(x2, y2, x1, stdy2, 'x')
+                x1, y1 = clip_outliers(x1, y1, y2, stdy1, 'y')
+                x2, y2 = clip_outliers(x2, y2, y1, stdy2, 'y')
+
+    # Find intersection x,y point(s)
+    # Here we assume that InterX is already defined function
+    P = InterX([x1, y1], [x2, y2])
+
+    # If InterX returns None, try using shared_paths
+    if P is None:
+        line1 = LineString(np.column_stack([x1, y1]))
+        line2 = LineString(np.column_stack([x2, y2]))
+        shared = shared_paths(line1, line2)
+        if not shared.is_empty:
+            # Access the shared paths via the 'geoms' attribute
+            forward, reverse = shared.geoms
+            if not forward.is_empty:
+                # Extract the coordinates of each sub-geometry in 'forward'
+                coords = []
+                for geom in forward.geoms:
+                    coords.extend(geom.coords)
+                x, y = np.array(coords).T
+                P = [x, y]
+
+    # If P is still None after trying shared_paths, return None
+    if P is None:
+        return None
+
+    # Transform back to lat/lon space
+    lati, loni = ps2ll(np.array(P[0]), np.array(P[1]))
+
+    return lati, loni
+
+
+def clip_outliers(x, y, x_compare, std, axis):
+    if axis == 'x':
+        y = y[np.abs(x - np.mean(x_compare)) < std]
+        x = x[np.abs(x - np.mean(x_compare)) < std]
+    elif axis == 'y':
+        x = x[np.abs(y - np.mean(x_compare)) < std]
+        y = y[np.abs(y - np.mean(x_compare)) < std]
+    return x, y
+
+
+def InterX(L1, L2):
+    line1 = LineString(np.column_stack(L1))
+    line2 = LineString(np.column_stack(L2))
+    intersection = line1.intersection(line2)
+    if intersection.is_empty:
+        return None
+    elif intersection.geom_type == 'Point':
+        x, y = intersection.xy
+        return [list(x), list(y)]
+
+    elif intersection.geom_type == 'MultiPoint':
+        x, y = MultiPoint(intersection).xy
+        return [list(x), list(y)]
+
+    elif intersection.geom_type == 'GeometryCollection':
+        intersections = [np.column_stack((point.xy)) for point in intersection if point.geom_type == 'Point']
+        return intersections
