@@ -19,6 +19,8 @@ from scipy.interpolate import interp1d
 from shapely import MultiPoint
 from shapely.geometry import LineString
 from shapely.ops import shared_paths
+import mpl_toolkits
+from mpl_toolkits.basemap import Basemap
 
 # In[ ]:
 
@@ -549,7 +551,7 @@ def find2drange(X, Y, xi, yi, extraIndices=(0, 0)):
 # In[ ]:
 
 
-def geoquadps(latlim, lonlim, meridian=0, plotkm=False, **kwargs):
+def geoquadps(m, latlim, lonlim, meridian=0, plotkm=False, **kwargs):
     assert len(latlim) == 2 and len(lonlim) == 2, "Error: latlim and lonlim must each be two-element arrays."
     assert all(-90 <= lat <= 90 for lat in latlim) and all(-180 <= lon <= 180 for lon in lonlim), "Error: latlim and lonlim must be geographic coordinates."
 
@@ -559,16 +561,15 @@ def geoquadps(latlim, lonlim, meridian=0, plotkm=False, **kwargs):
     lat = np.concatenate((np.linspace(latlim[0], latlim[0], 200), np.linspace(latlim[1], latlim[1], 200), [latlim[0]]))
     lon = np.concatenate((np.linspace(lonlim[0], lonlim[1], 200), np.linspace(lonlim[1], lonlim[0], 200), [lonlim[0]]))
 
-    x, y = ll2ps(lat, lon)
+    x, y = m(lat, lon)
 
     if plotkm:
         x = x / 1000
         y = y / 1000
 
-    h = plt.plot(x, y, **kwargs)
-    plt.gca().set_aspect('equal', adjustable='box')
+    m = plt.plot(x, y, **kwargs)
 
-    return h
+    return m
 
 
 def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereographic = False):
@@ -932,3 +933,10 @@ def InterX(L1, L2):
     elif intersection.geom_type == 'GeometryCollection':
         intersections = [np.column_stack((point.xy)) for point in intersection if point.geom_type == 'Point']
         return intersections
+
+
+def antbounds():
+    fig, ax = plt.subplots(figsize=(10,10))
+    m = Basemap(projection='spstere',boundinglat=-60,lon_0=180,resolution='c')
+    m.drawcoastlines()
+    return m, ax
