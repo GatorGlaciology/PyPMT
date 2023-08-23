@@ -1046,3 +1046,4 @@ def plot3ps(lat, lon, z, km=False, meridian=0, **kwargs):
     plt.show()
 
     return h
+
