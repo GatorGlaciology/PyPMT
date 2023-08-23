@@ -1006,3 +1006,43 @@ def pcolorps(lat, lon, Z, km=False, meridian=0, **kwargs):
     # plt.gca().autoscale(False)
 
     return h
+
+
+def plot3ps(lat, lon, z, km=False, meridian=0, **kwargs):
+    if not isinstance(lat, (list, tuple, np.ndarray)):
+        lat = [lat]
+        lon = [lon]
+    else:
+        assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+    assert np.max(np.abs(
+        lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
+
+    plot_km = km
+    plot_meridian = meridian
+
+    x, y = ll2ps(lat, lon, meridian=plot_meridian)
+
+    if plot_km:
+        x = x / 1000
+        y = y / 1000
+
+    # Create a 3D plot
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot the data
+    h = ax.plot(x, y, z, **kwargs)
+    # Adjust axis properties
+    ax.axis('tight')
+    # Adjust axis properties
+    xlim_diff = np.diff(ax.get_xlim())[0]
+    ylim_diff = np.diff(ax.get_ylim())[0]
+    zlim_diff = np.diff(ax.get_zlim())[0]
+    ax.set_box_aspect([xlim_diff, ylim_diff, zlim_diff])
+
+    # Add more plots to the same figure
+    plt.show()
+
+    return h
