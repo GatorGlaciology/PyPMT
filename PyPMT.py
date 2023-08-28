@@ -1047,3 +1047,54 @@ def plot3ps(lat, lon, z, km=False, meridian=0, **kwargs):
 
     return h
 
+
+def circleps(lat_or_x, lon_or_y, radius_km, km=False, meridian=0, **kwargs):
+    assert len(lat_or_x) == len(lon_or_y), "Input error: Coordinate dimensions do not match."
+    assert isinstance(radius_km, (int, float, list, tuple, np.ndarray)), "Input error: Make sure radius_km is numeric."
+    assert len(lat_or_x) == len(
+        radius_km), "Input error: Circle radius declaration must either be a scalar value or its dimensions must match the dimensions of the circle center coordinates."
+
+    NOP = 1000  # number of points per circle
+
+    plot_meridian = meridian
+    plot_km = km
+
+    if islatlon(lat_or_x, lon_or_y):
+        x, y = ll2ps(lat_or_x, lon_or_y, meridian=plot_meridian)
+    else:
+        x = lat_or_x
+        y = lon_or_y
+
+    if plot_km:
+        x = x / 1000
+        y = y / 1000
+        r = radius_km
+    else:
+        r = radius_km * 1000
+
+    # Make inputs column vectors
+    x = x.reshape(-1, 1)
+    y = y.reshape(-1, 1)
+    r = r.reshape(-1, 1)
+
+    if np.isscalar(r):
+        r = np.full_like(x, r)
+
+    # Define an independent variable for drawing circle(s)
+    t = np.linspace(0, 2 * np.pi, NOP)
+
+    # create an array w/ same size as x, but all NaN values
+    h = np.empty_like(x)
+    h[:] = np.nan
+
+    # plot circles singly
+    for n in range(len(x)):
+        circle_x = x[n] + r[n] * np.cos(t)
+        circle_y = y[n] + r[n] * np.sin(t)
+        plt.fill(circle_x, circle_y, color='none', edgecolor='blue', **kwargs)
+
+    # Set plot attributes
+    plt.gca().set_aspect('equal')
+
+    return h
+
