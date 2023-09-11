@@ -21,6 +21,7 @@ from shapely.geometry import LineString
 from shapely.ops import shared_paths
 import mpl_toolkits
 from mpl_toolkits.basemap import Basemap
+from matplotlib.patches import Polygon, Circle
 
 # In[ ]:
 
@@ -1047,3 +1048,97 @@ def plot3ps(lat, lon, z, km=False, meridian=0, **kwargs):
 
     return h
 
+
+def circleps(lat_or_x, lon_or_y, radius_km, km=False, meridian=0, **kwargs):
+    assert len(lat_or_x) == len(lon_or_y), "Input error: Coordinate dimensions do not match."
+    assert isinstance(radius_km, (int, float, list, tuple, np.ndarray)), "Input error: Make sure radius_km is numeric."
+    assert len(lat_or_x) == len(
+        radius_km), "Input error: Circle radius declaration must either be a scalar value or its dimensions must match the dimensions of the circle center coordinates."
+
+    NOP = 1000  # number of points per circle
+
+    plot_meridian = meridian
+    plot_km = km
+
+    if islatlon(lat_or_x, lon_or_y):
+        x, y = ll2ps(lat_or_x, lon_or_y, meridian=plot_meridian)
+    else:
+        x = lat_or_x
+        y = lon_or_y
+
+    if plot_km:
+        x = x / 1000
+        y = y / 1000
+        r = radius_km
+    else:
+        r = radius_km * 1000
+
+    # Make inputs column vectors
+    x = x.reshape(-1, 1)
+    y = y.reshape(-1, 1)
+    r = r.reshape(-1, 1)
+
+    if np.isscalar(r):
+        r = np.full_like(x, r)
+
+    # Define an independent variable for drawing circle(s)
+    t = np.linspace(0, 2 * np.pi, NOP)
+
+    # create an array w/ same size as x, but all NaN values
+    h = np.empty_like(x)
+    h[:] = np.nan
+
+    # plot circles singly
+    for n in range(len(x)):
+        circle_x = x[n] + r[n] * np.cos(t)
+        circle_y = y[n] + r[n] * np.sin(t)
+        plt.fill(circle_x, circle_y, color='none', edgecolor='blue', **kwargs)
+
+    # Set plot attributes
+    plt.gca().set_aspect('equal')
+
+    return h
+
+
+def patchps(lat, lon, plotkm=False, meridian=0, point_size=1, **kwargs):
+    if not isinstance(lat, (list, tuple, np.ndarray)):
+        lat = [lat]
+        lon = [lon]
+    else:
+        assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "patchps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "patchps requires numeric inputs first."
+    assert np.max(np.abs(
+        lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
+    assert isinstance(meridian, (int, float)), "Error: meridian must be a scalar longitude."
+
+    x, y = ll2ps(lat, lon, meridian=meridian)
+
+    if plotkm:
+        x = x / 1000
+        y = y / 1000
+
+    # Create a figure and axis
+    fig, ax = plt.subplots()
+
+    if len(x) == 1 and len(y) == 1:
+        # If only one point, create a Circle patch for it
+        circle = Circle((x[0], y[0]), point_size, **kwargs)
+        ax.add_patch(circle)
+
+        # Set plot limits to ensure the point is visible
+        ax.set_xlim(x[0] - point_size, x[0] + point_size)
+        ax.set_ylim(y[0] - point_size, y[0] + point_size)
+    else:
+        # Create a Polygon patch with vertices (x, y)
+        for i in range(len(x)):
+            ax.scatter(x[i], y[i], color=kwargs.get('color', 'blue')[i], alpha=kwargs.get('alpha', 0.5))
+
+        # Set the limits of the plot to the min and max of x and y
+        ax.set_xlim(min(x), max(x))
+        ax.set_ylim(min(y), max(y))
+
+    # Customize the plot as needed
+    # You can set labels, limits, and other properties here
+
+    plt.show()
