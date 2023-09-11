@@ -1142,3 +1142,97 @@ def patchps(lat, lon, plotkm=False, meridian=0, point_size=1, **kwargs):
     # You can set labels, limits, and other properties here
 
     plt.show()
+
+
+
+
+def scarlabel(featurename, *args):
+    # Check if at least one input is provided
+    assert len(featurename) > 0, "The scarlabel requires at least one input. What are you trying to label?"
+
+    # Check if the featurename is a string or a list of strings
+    if isinstance(featurename, str):
+        featurename = [featurename]
+    elif isinstance(featurename, list):
+        assert all(isinstance(name, str) for name in featurename), "Feature names must be strings."
+    else:
+        raise ValueError("Feature names must be a string or a list of strings.")
+
+    # Check if 'km' is in the arguments to specify polar stereographic kilometers
+    plotkm = False
+    if 'km' in args:
+        plotkm = True
+        args = list(args)
+        args.remove('km')
+
+    # Get the current axes and check if it's a map
+    mapit = False
+    try:
+        if plt.gca().is_map:
+            mapit = True
+    except AttributeError:
+        pass
+
+    # Initialize the Basemap if it's a map
+    if mapit:
+        m = plt.gca().basemap
+    else:
+        # Create a polar stereographic Basemap if not on a map
+        m = Basemap(projection='spstere', lon_0=0, lat_0=-90, boundinglat=-60)
+
+    # Get location(s)
+    featurelat, featurelon = [], []
+    for name in featurename:
+        if name.lower() == 'glaciers':
+            # Load glacier data from file
+            data = np.load('scarnames.npz')
+            lat = data['lat']
+            lon = data['lon']
+            names = data['names']
+            featureType = data['featureType']
+            ind = np.where(featureType == 'glacier')[0]
+            featurelat.extend(lat[ind])
+            featurelon.extend(lon[ind])
+        elif name.lower() == 'ice shelves':
+            # Load ice shelf data from file
+            data = np.load('scarnames.npz')
+            lat = data['lat']
+            lon = data['lon']
+            names = data['names']
+            featureType = data['featureType']
+            ind = np.where(featureType == 'ice shelf')[0]
+            featurelat.extend(lat[ind])
+            featurelon.extend(lon[ind])
+        else:
+            # Use scarloc function to get location
+            lat, lon = scarloc(name)
+            featurelat.append(lat)
+            featurelon.append(lon)
+
+    # Convert to polar stereographic if needed
+    if not mapit:
+        featurelon, featurelat = m(featurelon, featurelat)
+
+    # Place text label
+    for i in range(len(featurename)):
+        plt.text(featurelon[i], featurelat[i], featurename[i], horizontalalignment='center', verticalalignment='middle')
+
+    # Place a marker if requested
+    if 'marker' in args:
+        marker_style = args[args.index('marker') + 1]
+        plt.plot(featurelon, featurelat, marker_style)
+
+    # Format text and marker
+    for i in range(len(args)):
+        if args[i] != 'marker':
+            plt.setp(plt.gca().texts[i], **{args[i]: args[i + 1]})
+
+    # Clean up
+    if not any(isinstance(arg, str) and arg.startswith('font') for arg in args):
+        plt.gca().texts.clear()
+
+    # Show the plot if not in a map
+    if not mapit:
+        plt.show()
+
+    return plt.gca().texts   
