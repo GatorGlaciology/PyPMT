@@ -1144,9 +1144,7 @@ def patchps(lat, lon, plotkm=False, meridian=0, point_size=1, **kwargs):
     plt.show()
 
 
-
-
-def scarlabel(featurename, *args):
+def scarlabel(m, featurename, *args, ax=None):
     # Check if at least one input is provided
     assert len(featurename) > 0, "The scarlabel requires at least one input. What are you trying to label?"
 
@@ -1168,17 +1166,17 @@ def scarlabel(featurename, *args):
     # Get the current axes and check if it's a map
     mapit = False
     try:
-        if plt.gca().is_map:
+        if ax.gca().is_map:
             mapit = True
     except AttributeError:
         pass
 
     # Initialize the Basemap if it's a map
     if mapit:
-        m = plt.gca().basemap
+        m = ax.gca().basemap
     else:
         # Create a polar stereographic Basemap if not on a map
-        m = Basemap(projection='spstere', lon_0=0, lat_0=-90, boundinglat=-60)
+        m = Basemap(projection='spstere',boundinglat=-60,lon_0=180,resolution='c')
 
     # Get location(s)
     featurelat, featurelon = [], []
@@ -1215,24 +1213,24 @@ def scarlabel(featurename, *args):
 
     # Place text label
     for i in range(len(featurename)):
-        plt.text(featurelon[i], featurelat[i], featurename[i], horizontalalignment='center', verticalalignment='middle')
+        ax.text(featurelon[i], featurelat[i], featurename[i], horizontalalignment='center', verticalalignment='top')
 
     # Place a marker if requested
     if 'marker' in args:
         marker_style = args[args.index('marker') + 1]
-        plt.plot(featurelon, featurelat, marker_style)
+        ax.plot(featurelon, featurelat, marker_style)
 
     # Format text and marker
     for i in range(len(args)):
         if args[i] != 'marker':
-            plt.setp(plt.gca().texts[i], **{args[i]: args[i + 1]})
+            ax.setp(ax.gca().texts[i], **{args[i]: args[i + 1]})
 
     # Clean up
-    if not any(isinstance(arg, str) and arg.startswith('font') for arg in args):
-        plt.gca().texts.clear()
+    #if not any(isinstance(arg, str) and arg.startswith('font') for arg in args):
+        #ax.clear()
 
     # Show the plot if not in a map
     if not mapit:
         plt.show()
 
-    return plt.gca().texts   
+    return m
