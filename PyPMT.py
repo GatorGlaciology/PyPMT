@@ -1234,3 +1234,58 @@ def scarlabel(m, featurename, *args, ax=None):
         plt.show()
 
     return m
+
+
+def ps2wkt(lati_or_xi, loni_or_yi, filename=None):
+    """
+    Converts polar stereographic coordinates to WKT format.
+
+    Parameters
+    ----------
+    lati_or_xi : array-like
+        1D array of latitude or polar stereographic x-coordinates.
+    loni_or_yi : array-like
+        1D array of longitude or polar stereographic y-coordinates.
+    filename : str or None, optional
+        If specified, write WKT to a file with this name.
+
+    Returns
+    -------
+    str or None
+        If `filename` is not specified, the WKT string is returned. Otherwise, `None` is returned.
+
+    """
+    assert len(lati_or_xi) == len(loni_or_yi), 'Error: Dimensions of input coordinates do not agree.'
+    if isinstance(lati_or_xi[0], float) or isinstance(lati_or_xi[0], int):
+        lati, loni = ps2ll(lati_or_xi, loni_or_yi)
+        return_wkt = True
+    else:
+        return_wkt = False
+        lati, loni = lati_or_xi, loni_or_yi  # Assign input arguments to new variables
+
+    # Combine loni and lati into a matrix
+    coords = np.column_stack((loni, lati))
+
+    # convert the matrix to a string
+    coords_str = np.array2string(coords, formatter={'all': lambda x: str(x)})
+
+    # Replace square brackets with parentheses
+    coords_str = coords_str.replace('[', '(').replace(']', ')')
+
+    # Replace semicolons with commas and spaces
+    coords_str = coords_str.replace(';', ', ')
+
+    # Use regular expressions to remove consecutive "(, )" sequences
+    coords_str = re.sub(r'\(, +\)', '), (', coords_str)
+
+    # Create the WKT string with "POLYGON" prefix
+    wkt = f'POLYGON({coords_str})'
+
+    if filename is not None:
+        with open(filename, 'w') as f:
+            f.write(wkt)
+            return None
+    if return_wkt:
+        return wkt
+    else:
+        return np.array(lati), np.array(loni)
