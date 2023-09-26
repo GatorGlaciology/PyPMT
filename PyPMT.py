@@ -1290,3 +1290,31 @@ def ps2wkt(lati_or_xi, loni_or_yi, filename=None):
         return wkt
     else:
         return np.array(lati), np.array(loni)
+
+
+def scatterps(lat, lon, km=False, meridian=0, *args, **kwargs):
+    if not isinstance(lat, (list, tuple, np.ndarray)):
+        lat = [lat]
+        lon = [lon]
+    else:
+        assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+    assert np.max(np.abs(
+        lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
+
+    plot_km = km
+    plot_meridian = meridian
+
+    x, y = ll2ps(lat, lon, meridian=plot_meridian)
+
+    if plot_km:
+        x = x / 1000
+        y = y / 1000
+
+    h = plt.scatter(x, y, *args, **kwargs)
+
+    plt.gca().set_aspect('equal')
+
+    return h
+
