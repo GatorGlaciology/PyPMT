@@ -1050,55 +1050,35 @@ def plot3ps(lat, lon, z, km=False, meridian=0, **kwargs):
     return h
 
 
-def circleps(lat_or_x, lon_or_y, radius_km, km=False, meridian=0, **kwargs):
-    assert len(lat_or_x) == len(lon_or_y), "Input error: Coordinate dimensions do not match."
-    assert isinstance(radius_km, (int, float, list, tuple, np.ndarray)), "Input error: Make sure radius_km is numeric."
-    assert len(lat_or_x) == len(
-        radius_km), "Input error: Circle radius declaration must either be a scalar value or its dimensions must match the dimensions of the circle center coordinates."
+def circleps(m, lons, lats, radii, km=False, **kwargs):
+    """
+    m     : Basemap instance
+    lon   : Longitude of the center of the circle
+    lat   : Latitude of the center of the circle
+    radius: Radius of the circle
+    km : whether the input radius is in km or m (True for km)
+    """
 
-    NOP = 1000  # number of points per circle
+    if km:
+        radii = radii * 1000
 
-    plot_meridian = meridian
-    plot_km = km
+    # Convert inputs to numpy arrays if they are not already arrays
+    if not isinstance(lons, np.ndarray):
+        lons = np.array([lons])
+    if not isinstance(lats, np.ndarray):
+        lats = np.array([lats])
+    if not isinstance(radii, np.ndarray):
+        radii = np.array([radii])
 
-    if islatlon(lat_or_x, lon_or_y):
-        x, y = ll2ps(lat_or_x, lon_or_y, meridian=plot_meridian)
-    else:
-        x = lat_or_x
-        y = lon_or_y
+    assert len(lons) == len(lats) == len(radii), 'Input arrays must have the same length'
+    assert islatlon(lats, lons), 'The latitude/longitude you entered is not correct.'
 
-    if plot_km:
-        x = x / 1000
-        y = y / 1000
-        r = radius_km
-    else:
-        r = radius_km * 1000
-
-    # Make inputs column vectors
-    x = x.reshape(-1, 1)
-    y = y.reshape(-1, 1)
-    r = r.reshape(-1, 1)
-
-    if np.isscalar(r):
-        r = np.full_like(x, r)
-
-    # Define an independent variable for drawing circle(s)
-    t = np.linspace(0, 2 * np.pi, NOP)
-
-    # create an array w/ same size as x, but all NaN values
-    h = np.empty_like(x)
-    h[:] = np.nan
-
-    # plot circles singly
-    for n in range(len(x)):
-        circle_x = x[n] + r[n] * np.cos(t)
-        circle_y = y[n] + r[n] * np.sin(t)
-        plt.fill(circle_x, circle_y, color='none', edgecolor='blue', **kwargs)
-
-    # Set plot attributes
-    plt.gca().set_aspect('equal')
-
-    return h
+    for lon, lat, radius in zip(lons, lats, radii):
+        # Convert lon/lat to (x, y) coordinates
+        xpt, ypt = m(lon, lat)
+        # Create a circle
+        circle = plt.Circle((xpt, ypt), radius, **kwargs)
+        plt.gca().add_patch(circle)
 
 
 def patchps(lat, lon, plotkm=False, meridian=0, point_size=1, **kwargs):
