@@ -1081,48 +1081,26 @@ def circleps(m, lons, lats, radii, km=False, **kwargs):
         plt.gca().add_patch(circle)
 
 
-def patchps(lat, lon, plotkm=False, meridian=0, point_size=1, **kwargs):
-    if not isinstance(lat, (list, tuple, np.ndarray)):
-        lat = [lat]
-        lon = [lon]
-    else:
-        assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
-    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "patchps requires numeric inputs first."
-    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "patchps requires numeric inputs first."
-    assert np.max(np.abs(
-        lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
-    assert isinstance(meridian, (int, float)), "Error: meridian must be a scalar longitude."
+def patchps(m, lat, lon, ax=None, color='b', **kwargs):
+    # Set default values
+    plotkm = kwargs.get('plotkm', False)
+    meridian = kwargs.get('meridian', 0)
 
-    x, y = ll2ps(lat, lon, meridian=meridian)
+    # Convert units and plot:
+    x, y = m(lon, lat)
 
+    # Convert to kilometers if requested:
     if plotkm:
         x = x / 1000
         y = y / 1000
 
-    # Create a figure and axis
-    fig, ax = plt.subplots()
+    # Create a patch object
+    poly = Polygon(np.column_stack((x, y)), closed=True, fill=True, edgecolor=color, **kwargs)
 
-    if len(x) == 1 and len(y) == 1:
-        # If only one point, create a Circle patch for it
-        circle = Circle((x[0], y[0]), point_size, **kwargs)
-        ax.add_patch(circle)
+    if ax is not None:
+        ax.add_patch(poly)
 
-        # Set plot limits to ensure the point is visible
-        ax.set_xlim(x[0] - point_size, x[0] + point_size)
-        ax.set_ylim(y[0] - point_size, y[0] + point_size)
-    else:
-        # Create a Polygon patch with vertices (x, y)
-        for i in range(len(x)):
-            ax.scatter(x[i], y[i], color=kwargs.get('color', 'blue')[i], alpha=kwargs.get('alpha', 0.5))
-
-        # Set the limits of the plot to the min and max of x and y
-        ax.set_xlim(min(x), max(x))
-        ax.set_ylim(min(y), max(y))
-
-    # Customize the plot as needed
-    # You can set labels, limits, and other properties here
-
-    plt.show()
+    return poly
 
 
 def scarlabel(m, featurename, *args, ax=None):
