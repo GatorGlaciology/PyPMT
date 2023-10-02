@@ -1272,7 +1272,7 @@ def ps2wkt(lati_or_xi, loni_or_yi, filename=None):
         return np.array(lati), np.array(loni)
 
 
-def scatterps(lat, lon, km=False, meridian=0, *args, **kwargs):
+def scatterps(m, lat, lon, s=100, c='b', km=False, **kwargs):
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
@@ -1283,18 +1283,13 @@ def scatterps(lat, lon, km=False, meridian=0, *args, **kwargs):
     assert np.max(np.abs(
         lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
 
-    plot_km = km
-    plot_meridian = meridian
+    # Convert lat/lon to polar stereographic coordinates
+    x, y = m(lon, lat)
 
-    x, y = ll2ps(lat, lon, meridian=plot_meridian)
+    # If 'km' is present in kwargs, convert coordinates from meters to kilometers
+    if km:
+        x = [xi / 1000 for xi in x]
+        y = [yi / 1000 for yi in y]
 
-    if plot_km:
-        x = x / 1000
-        y = y / 1000
-
-    h = plt.scatter(x, y, *args, **kwargs)
-
-    plt.gca().set_aspect('equal')
-
-    return h
-
+    # Plot the points on the map
+    plt.scatter(x, y, s=s, c=c, **kwargs)
