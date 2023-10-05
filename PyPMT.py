@@ -17,12 +17,16 @@ from pyproj import CRS, Transformer
 from scipy.spatial.distance import pdist, squareform
 from scipy.interpolate import interp1d
 from shapely import MultiPoint
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
 from shapely.ops import shared_paths
 import mpl_toolkits
 from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import Polygon, Circle
 import re
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+from cartopy.geodesic import Geodesic
+from cartopy.feature import NaturalEarthFeature
 
 # In[ ]:
 
@@ -938,10 +942,16 @@ def InterX(L1, L2):
 
 
 def antbounds():
-    fig, ax = plt.subplots(figsize=(10,10))
-    m = Basemap(projection='spstere',boundinglat=-60,lon_0=180,resolution='c')
-    m.drawcoastlines()
-    return m, ax
+    fig, ax = plt.subplots(figsize=(10, 10),
+                           subplot_kw={'projection': ccrs.Stereographic(central_longitude=0, central_latitude=-90)})
+    ax.set_extent([-180, 180, -90, -60], ccrs.PlateCarree())
+    ax.coastlines(resolution='10m', color='black', linewidth=1.0)
+
+    # Add ice shelves as a NaturalEarthFeature
+    ice_shelves = NaturalEarthFeature(category='physical', name='antarctic_ice_shelves_polys', scale='10m')
+    ax.add_feature(ice_shelves, facecolor='none', edgecolor='black', linewidth=1.0)
+
+    return ax
 
 
 def plotps(lat, lon, km=False, meridian=0, *args, **kwargs):
@@ -1050,19 +1060,12 @@ def plot3ps(lat, lon, z, km=False, meridian=0, **kwargs):
     return h
 
 
-def circleps(m, lons, lats, radii, km=False, **kwargs):
-    """
-    m     : Basemap instance
-    lon   : Longitude of the center of the circle
-    lat   : Latitude of the center of the circle
-    radius: Radius of the circle
-    km : whether the input radius is in km or m (True for km)
-    """
+def circleps(ax, lons, lats, radii, km=False, **kwargs):
+    geodetic = ccrs.Geodetic(globe=ccrs.Globe(datum='WGS84'))
 
     if km:
         radii = radii * 1000
 
-    # Convert inputs to numpy arrays if they are not already arrays
     if not isinstance(lons, np.ndarray):
         lons = np.array([lons])
     if not isinstance(lats, np.ndarray):
@@ -1071,14 +1074,11 @@ def circleps(m, lons, lats, radii, km=False, **kwargs):
         radii = np.array([radii])
 
     assert len(lons) == len(lats) == len(radii), 'Input arrays must have the same length'
-    assert islatlon(lats, lons), 'The latitude/longitude you entered is not correct.'
 
     for lon, lat, radius in zip(lons, lats, radii):
-        # Convert lon/lat to (x, y) coordinates
-        xpt, ypt = m(lon, lat)
-        # Create a circle
-        circle = plt.Circle((xpt, ypt), radius, **kwargs)
-        plt.gca().add_patch(circle)
+        geod = Geodesic()
+        circle_points = geod.circle(lon, lat, radius, n_samples=100)
+        ax.plot(circle_points[:, 0], circle_points[:, 1], transform=geodetic, **kwargs)
 
 
 def patchps(m, lat, lon, ax=None, color='b', **kwargs):
