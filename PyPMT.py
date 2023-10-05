@@ -1250,24 +1250,20 @@ def ps2wkt(lati_or_xi, loni_or_yi, filename=None):
         return np.array(lati), np.array(loni)
 
 
-def scatterps(m, lat, lon, s=100, c='b', km=False, **kwargs):
+def scatterps(ax, lat, lon, s=100, c='b', km=False, **kwargs):
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
     else:
         assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
-    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
-    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
-    assert np.max(np.abs(
-        lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
-
-    # Convert lat/lon to polar stereographic coordinates
-    x, y = m(lon, lat)
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "scatterps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "scatterps requires numeric inputs first."
+    assert np.max(np.abs(lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
 
     # If 'km' is present in kwargs, convert coordinates from meters to kilometers
     if km:
-        x = [xi / 1000 for xi in x]
-        y = [yi / 1000 for yi in y]
+        lat = [li / 1000 for li in lat]
+        lon = [lo / 1000 for lo in lon]
 
     # Plot the points on the map
-    plt.scatter(x, y, s=s, c=c, **kwargs)
+    ax.scatter(lon, lat, s=s, c=c, transform=ccrs.PlateCarree(), **kwargs)
