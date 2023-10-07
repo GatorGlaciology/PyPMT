@@ -22,6 +22,8 @@ from shapely.ops import shared_paths
 import mpl_toolkits
 from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import Polygon, Circle
+import matplotlib.patches as mpatches
+import matplotlib.path as mpath
 import re
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
@@ -557,7 +559,7 @@ def find2drange(X, Y, xi, yi, extraIndices=(0, 0)):
 # In[ ]:
 
 
-def geoquadps(m, latlim, lonlim, meridian=0, plotkm=False, **kwargs):
+def geoquadps(ax, latlim, lonlim, plotkm=False, **kwargs):
     assert len(latlim) == 2 and len(lonlim) == 2, "Error: latlim and lonlim must each be two-element arrays."
     assert all(-90 <= lat <= 90 for lat in latlim) and all(-180 <= lon <= 180 for lon in lonlim), "Error: latlim and lonlim must be geographic coordinates."
 
@@ -567,15 +569,12 @@ def geoquadps(m, latlim, lonlim, meridian=0, plotkm=False, **kwargs):
     lat = np.concatenate((np.linspace(latlim[0], latlim[0], 200), np.linspace(latlim[1], latlim[1], 200), [latlim[0]]))
     lon = np.concatenate((np.linspace(lonlim[0], lonlim[1], 200), np.linspace(lonlim[1], lonlim[0], 200), [lonlim[0]]))
 
-    x, y = m(lat, lon)
+    vertices = np.column_stack([lon, lat])
+    path = mpath.Path(vertices)
+    patch = mpatches.PathPatch(path, transform=ccrs.Geodetic(), **kwargs)
+    ax.add_patch(patch)
 
-    if plotkm:
-        x = x / 1000
-        y = y / 1000
-
-    m = plt.plot(x, y, **kwargs)
-
-    return m
+    return ax
 
 
 def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereographic = False):
