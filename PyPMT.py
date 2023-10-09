@@ -1102,7 +1102,7 @@ def patchps(m, lat, lon, ax=None, color='b', **kwargs):
     return poly
 
 
-def scarlabel(m, featurename, *args, ax=None):
+def scarlabel(ax, featurename, plotkm = False, *args, **kwargs):
     # Check if at least one input is provided
     assert len(featurename) > 0, "The scarlabel requires at least one input. What are you trying to label?"
 
@@ -1114,33 +1114,15 @@ def scarlabel(m, featurename, *args, ax=None):
     else:
         raise ValueError("Feature names must be a string or a list of strings.")
 
-    # Check if 'km' is in the arguments to specify polar stereographic kilometers
-    plotkm = False
-    if 'km' in args:
-        plotkm = True
-        args = list(args)
-        args.remove('km')
+    plot_marker = False
+    if 'marker' in args:
+        plot_marker = True
+        marker_style = args[args.index('marker') + 1]
+        args.remove('marker')
 
-    # Get the current axes and check if it's a map
-    mapit = False
-    try:
-        if ax.gca().is_map:
-            mapit = True
-    except AttributeError:
-        pass
-
-    # Initialize the Basemap if it's a map
-    if mapit:
-        m = ax.gca().basemap
-    else:
-        # Create a polar stereographic Basemap if not on a map
-        m = Basemap(projection='spstere',boundinglat=-60,lon_0=180,resolution='c')
-
-    # Get location(s)
     featurelat, featurelon = [], []
     for name in featurename:
         if name.lower() == 'glaciers':
-            # Load glacier data from file
             data = np.load('scarnames.npz')
             lat = data['lat']
             lon = data['lon']
@@ -1150,7 +1132,6 @@ def scarlabel(m, featurename, *args, ax=None):
             featurelat.extend(lat[ind])
             featurelon.extend(lon[ind])
         elif name.lower() == 'ice shelves':
-            # Load ice shelf data from file
             data = np.load('scarnames.npz')
             lat = data['lat']
             lon = data['lon']
@@ -1160,38 +1141,27 @@ def scarlabel(m, featurename, *args, ax=None):
             featurelat.extend(lat[ind])
             featurelon.extend(lon[ind])
         else:
-            # Use scarloc function to get location
             lat, lon = scarloc(name)
             featurelat.append(lat)
             featurelon.append(lon)
 
-    # Convert to polar stereographic if needed
-    if not mapit:
-        featurelon, featurelat = m(featurelon, featurelat)
+    if plotkm:
+        featurelon = [lo / 1000 for lo in featurelon]
+        featurelat = [la / 1000 for la in featurelat]
 
     # Place text label
     for i in range(len(featurename)):
-        ax.text(featurelon[i], featurelat[i], featurename[i], horizontalalignment='center', verticalalignment='top')
-
-    # Place a marker if requested
-    if 'marker' in args:
-        marker_style = args[args.index('marker') + 1]
-        ax.plot(featurelon, featurelat, marker_style)
+        ax.text(featurelon[i], featurelat[i], featurename[i], horizontalalignment='center', verticalalignment='top', transform=ccrs.PlateCarree(), **kwargs)
 
     # Format text and marker
     for i in range(len(args)):
         if args[i] != 'marker':
             ax.setp(ax.gca().texts[i], **{args[i]: args[i + 1]})
 
-    # Clean up
-    #if not any(isinstance(arg, str) and arg.startswith('font') for arg in args):
-        #ax.clear()
+    if plot_marker:
+        ax.scatter(featurelon, featurelat, marker=marker_style, transform=ccrs.PlateCarree())
 
-    # Show the plot if not in a map
-    if not mapit:
-        plt.show()
-
-    return m
+    return ax
 
 
 def ps2wkt(lati_or_xi, loni_or_yi, filename=None):
