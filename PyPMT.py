@@ -953,36 +953,15 @@ def antbounds():
     return ax
 
 
-def plotps(lat, lon, km=False, meridian=0, *args, **kwargs):
-    if not isinstance(lat, (list, tuple, np.ndarray)):
+def plotps(ax, lat, lon, km=False, **kwargs):
+    if np.isscalar(lat):
         lat = [lat]
+    if np.isscalar(lon):
         lon = [lon]
-    else:
-        assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
-    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
-    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
-    assert np.max(np.abs(
-        lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
-
-    plot_km = km
-    plot_meridian = meridian
-    assert isinstance(meridian, (int, float)), "Error: meridian must be a scalar longitude."
-
-    # Convert units and plot
-    x, y = ll2ps(lat, lon, meridian=plot_meridian)
-
-    # Convert to kilometers if user requested
-    if plot_km:
-        x = x / 1000
-        y = y / 1000
-
-    # plot data
-    h, = plt.plot(x, y, **kwargs, markersize=10)
-
-    # Set aspect ratio
-    plt.gca().set_aspect('equal')
-
-    return h
+    x, y = ll2ps(lat, lon)
+    if km:
+        x, y = x / 1000, y / 1000
+    return ax.plot(x, y, **kwargs)
 
 
 def pcolorps(lat, lon, Z, km=False, meridian=0, **kwargs):
