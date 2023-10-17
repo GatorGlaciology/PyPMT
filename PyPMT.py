@@ -999,6 +999,8 @@ def pcolorps(lat, lon, Z, km=False, meridian=0, **kwargs):
 
 
 def plot3ps(lat, lon, z, extra_m=50e3, meridian=0, **kwargs):
+    # going to make a function to load bedmachine data, will solved unresolved references
+
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
