@@ -998,7 +998,7 @@ def pcolorps(lat, lon, Z, km=False, meridian=0, **kwargs):
     return h
 
 
-def plot3ps(lat, lon, z, extra_m=50e3, meridian=0, **kwargs):
+def plot3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
     # going to make a function to load bedmachine data, will solved unresolved references
 
     if not isinstance(lat, (list, tuple, np.ndarray)):
@@ -1210,3 +1210,65 @@ def scatterps(ax, lat, lon, s=100, c='b', km=False, **kwargs):
 
     # Plot the points on the map
     ax.scatter(lon, lat, s=s, c=c, transform=ccrs.PlateCarree(), **kwargs)
+
+
+def surfps(lat, lon, x, y, z, plot_km=False, meridian=0, extra_dist=50e3, **kwargs):
+    if not isinstance(lat, (list, tuple, np.ndarray)):
+        lat = [lat]
+        lon = [lon]
+    else:
+        assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+
+    psx, psy = ll2ps(lat, lon, **kwargs)
+
+    if plot_km:
+        psx = psx / 1000
+        psy = psy / 1000
+        x = x / 1000
+        y = y / 1000
+        extra_dist = extra_dist / 1000
+
+    # Create masks to select data within a certain distance of the original points
+    maskx = np.abs(x - psx) < extra_dist
+    masky = np.abs(y - psy) < extra_dist
+
+    # Create 2D masks and apply them to the x, y, and Z data
+    maskxx, maskyy = np.meshgrid(maskx, masky)
+    mask2d = np.outer(maskx, masky)
+
+    # Get the indices of the masked elements
+    idx_x = np.where(maskx)[0]
+    idx_y = np.where(masky)[0]
+
+    # Use these indices to get the masked elements
+    x_msk = x[idx_x]
+    y_msk = y[idx_y]
+
+    # Apply the mask to the Z data
+    z_mask = z[mask2d]
+
+    # Create the meshgrid
+    xx_msk, yy_msk = np.meshgrid(x_msk, y_msk)
+
+    # Reshape the masked Z data
+    z_masked = z_mask.reshape(xx_msk.shape)
+
+    # Create a 3D surface plot
+    fig, ax = plt.subplots(1, 1, figsize=(10, 10), subplot_kw=dict(projection='3d'))
+    ax.plot_surface(xx_msk, yy_msk, z_masked, **kwargs)
+    ax.grid(False)
+    ax.xaxis.pane.fill = False
+    ax.yaxis.pane.fill = False
+    ax.zaxis.pane.fill = False
+
+    if plot_km:
+        ax.set_xlabel('eastings (km)')
+        ax.set_ylabel('northings (km)')
+    else:
+        ax.set_xlabel('eastings (m)')
+        ax.set_ylabel('northings (m)')
+    ax.set_zlabel('elevation (m)')
+
+    plt.show()
