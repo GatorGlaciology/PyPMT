@@ -964,36 +964,18 @@ def plotps(ax, lat, lon, km=False, **kwargs):
     return ax.plot(x, y, **kwargs)
 
 
-def pcolorps(lat, lon, Z, km=False, meridian=0, **kwargs):
-    if len([lat, lon, Z]) < 3:
-        raise ValueError('The pcolorps function requires at least three inputs: lat, lon, and Z.')
+def pcolorps(ax, x, y, Z, **kwargs):
+    if len([x, y, Z]) < 3:
+        raise ValueError('The pcolorps function requires at least three inputs: x, y, and Z.')
 
-    if not np.issubdtype(np.array(lat).dtype, np.number):
-        raise ValueError('pcolorps requires numeric inputs first.')
+    if not np.issubdtype(np.array(x).dtype, np.number):
+        raise ValueError('pcolorps requires numeric inputs for x.')
 
-    if not np.issubdtype(np.array(lon).dtype, np.number):
-        raise ValueError('pcolorps requires numeric inputs first.')
-
-    if np.max(np.abs(lat)) > 90:
-        raise ValueError(
-            'I suspect you have entered silly data into pcolorps because some of your latitudes have absolute values exceeding 90 degrees.')
-
-    plot_km = km
-    plot_meridian = meridian
-
-    x, y = ll2ps(lat, lon, meridian=plot_meridian)
-
-    if plot_km:
-        x = x / 1000
-        y = y / 1000
+    if not np.issubdtype(np.array(y).dtype, np.number):
+        raise ValueError('pcolorps requires numeric inputs for y.')
 
     # Create a pseudocolor plot
-    h = plt.pcolor(x, y, Z, **kwargs)
-
-    # Set plot attributes
-    plt.gca().set_aspect('equal')
-    # plt.gca().set_axis_off()
-    # plt.gca().autoscale(False)
+    h = ax.pcolormesh(x, y, Z, **kwargs)
 
     return h
 
