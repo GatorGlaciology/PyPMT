@@ -1254,3 +1254,13 @@ def surfps(lat, lon, x, y, z, plot_km=False, meridian=0, extra_dist=50e3, **kwar
     ax.set_zlabel('elevation (m)')
 
     plt.show()
+
+
+def greenland_bounds():
+    fig = plt.figure(figsize=(10, 10))
+    map_proj = ccrs.Orthographic(central_longitude=-45.0, central_latitude=75.0)
+    ax = fig.add_subplot(1, 1, 1, projection=map_proj)
+    ax.set_extent([-74, -11, 59, 83], ccrs.PlateCarree()) # Adjust the extent as needed
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS)
+    return ax
