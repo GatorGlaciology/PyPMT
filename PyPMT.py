@@ -395,19 +395,12 @@ def vxvy2uv(lat_or_x, lon_or_y, vx, vy):
 # In[ ]:
 
 
-def quivermc(x, y, u, v, scale, arrow, cmap=None, colorbarOn=False, units=''):
-    # Create a quiver plot to visualize the vectors
-    quiver_plot = plt.quiver(x, y, u, v, angles='xy', scale_units='xy', scale=scale, width=arrow)
+def quivermc(lat, lon, u, v, **kwargs):
+    # Calculate the magnitude of the vectors
+    magnitude = np.sqrt(u ** 2 + v ** 2)
 
-    # If the user has requested a color map for the arrows
-    if cmap is not None:
-        magnitude = np.sqrt(u**2 + v**2)
-        quiver_plot.set_array(magnitude)
-        quiver_plot.set_cmap(cmap)
-        if colorbarOn:
-            plt.colorbar(quiver_plot, label=units)
-
-    # Show the plot
+    plt.figure(figsize=(20, 20))
+    plt.quiver(lon, lat, u, v, magnitude, **kwargs)
     plt.show()
 
 
