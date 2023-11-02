@@ -55,10 +55,10 @@ def load_csv_data(filename):
     return np.array(lat), np.array(lon), np.array(names)
 
 
-def strlookup(featurename, names):
-    featurename = featurename.lower()  # Convert featurename to lowercase for case-insensitive matching
+def str_lookup(feature_name, names):
+    feature_name = feature_name.lower()  # Convert feature_name to lowercase for case-insensitive matching
 
-    indices = [i for i, name in enumerate(names) if featurename in name.lower()]
+    indices = [i for i, name in enumerate(names) if feature_name in name.lower()]
 
     if len(indices) > 0:
         x = indices[0]  # Choose the first matching index
@@ -70,11 +70,11 @@ def strlookup(featurename, names):
     return x, NearbyNames
 
 
-def scarloc(featurename, *varargin):
+def scar_loc(feature_name, *varargin):
     
-    # Check if featurename is a list or a single string
-    if isinstance(featurename, str):
-        featurename = [featurename]
+    # Check if feature_name is a list or a single string
+    if isinstance(feature_name, str):
+        feature_name = [feature_name]
 
     # Handle optional arguments
     OfferHelp = False
@@ -93,39 +93,39 @@ def scarloc(featurename, *varargin):
     # Load data from CSV file
     lat, lon, names = load_csv_data('SCAR_CGA_PLACE_NAMES.csv')
 
-    featurelat = np.full(len(featurename), np.nan)
-    featurelon = np.full(len(featurename), np.nan)
+    feature_lat = np.full(len(feature_name), np.nan)
+    feature_lon = np.full(len(feature_name), np.nan)
 
     # Look for each feature name
-    for k in range(len(featurelat)):
-        x, NearbyNames = strlookup(featurename[k], names)
+    for k in range(len(feature_lat)):
+        x, NearbyNames = str_lookup(feature_name[k], names)
         if x is None and OfferHelp:
             fmsg = [
-                f'"{featurename[k]}" not found.',
-                f'Are you sure that "{featurename[k]}" exists in Antarctica?',
+                f'"{feature_name[k]}" not found.',
+                f'Are you sure that "{feature_name[k]}" exists in Antarctica?',
                 'Did a cat walk across your keyboard?',
                 'This is the real reason one shouldn''t text and drive. Check your spelling and try again.',
                 'Now you''re just making things up.',
-                f'SCAR has identified more than 25,000 features in Antarctica, but "{featurename[k]}" is not one of them.',
-                f'Can''t find "{featurename[k]}".',
-                f'"{featurename[k]}" may exist somewhere in the world, but you won''t find it in Antarctica.',
-                f'It is possible that Robert F. Scott named something in Antarctica "{featurename[k]}", but if he did there are no records of it.',
-                f'You must be thinking of {featurename[k]}, Kansas, because {featurename[k]}, Antarctica does not exist.',
-                f'Sure, they used to just call it {featurename[k]}, but not anymore, what with political correctness and all.',
-                f'"{featurename[k]}" is an interesting combination of letters, but I don''t think it''s any place in Antarctica.',
-                f'The great Wayne Cochran once sang, "Where oh where can my {featurename[k]} be?" Because it''s not in Antarctica.',
-                f'I''m pretty sure it is in violation of the Antarctic Treaty to refer to any place as "{featurename[k]}".',
-                f'"{featurename[k]}" does not match any entries in the SCAR database.',
-                f'Science is all about formality, so the bigwigs will surely look down their noses at such colloquial jargon as "{featurename[k]}".',
-                f'My doctor said I need to get my {featurename[k]} removed.',
+                f'SCAR has identified more than 25,000 features in Antarctica, but "{feature_name[k]}" is not one of them.',
+                f'Can''t find "{feature_name[k]}".',
+                f'"{feature_name[k]}" may exist somewhere in the world, but you won''t find it in Antarctica.',
+                f'It is possible that Robert F. Scott named something in Antarctica "{feature_name[k]}", but if he did there are no records of it.',
+                f'You must be thinking of {feature_name[k]}, Kansas, because {feature_name[k]}, Antarctica does not exist.',
+                f'Sure, they used to just call it {feature_name[k]}, but not anymore, what with political correctness and all.',
+                f'"{feature_name[k]}" is an interesting combination of letters, but I don''t think it''s any place in Antarctica.',
+                f'The great Wayne Cochran once sang, "Where oh where can my {feature_name[k]} be?" Because it''s not in Antarctica.',
+                f'I''m pretty sure it is in violation of the Antarctic Treaty to refer to any place as "{feature_name[k]}".',
+                f'"{feature_name[k]}" does not match any entries in the SCAR database.',
+                f'Science is all about formality, so the bigwigs will surely look down their noses at such colloquial jargon as "{feature_name[k]}".',
+                f'My doctor said I need to get my {feature_name[k]} removed.',
                 'Frostbitten Antarctic researcher mistypes again.',
                 'This may be an issue of American English versus British English.',
-                f'Antarctica''s a strange place, but it''s not science fiction. Verify that "{featurename[k]}" actually exists.',
-                f'What''s in a name? I''ll tell you what''s in a name: That which you call "{featurename[k]}" by any other name may actually exist in Antarctica.',
-                f'Did John Carpenter tell you''ll find "{featurename[k]}" in Antarctica?',
-                f'You know, some folks say glaciology is a shrinking field, but I say things are just heating up. In other news, "{featurename[k]}" does not exist.',
-                f'You''re a glaciologist? Isn''t that a slow-moving field? Also, I have to tell you, I can''t seem to find any record of "{featurename[k]}".',
-                f'Amazing glaciology, how sweet the sound... "{featurename[k]}" once was lost, and still has not been found.'
+                f'Antarctica''s a strange place, but it''s not science fiction. Verify that "{feature_name[k]}" actually exists.',
+                f'What''s in a name? I''ll tell you what''s in a name: That which you call "{feature_name[k]}" by any other name may actually exist in Antarctica.',
+                f'Did John Carpenter tell you''ll find "{feature_name[k]}" in Antarctica?',
+                f'You know, some folks say glaciology is a shrinking field, but I say things are just heating up. In other news, "{feature_name[k]}" does not exist.',
+                f'You''re a glaciologist? Isn''t that a slow-moving field? Also, I have to tell you, I can''t seem to find any record of "{feature_name[k]}".',
+                f'Amazing glaciology, how sweet the sound... "{feature_name[k]}" once was lost, and still has not been found.'
             ]
 
             np.random.shuffle(fmsg)
@@ -138,36 +138,36 @@ def scarloc(featurename, *varargin):
             return
 
         if x is not None:
-            featurelat[k] = lat[x]
-            featurelon[k] = lon[x]
+            feature_lat[k] = lat[x]
+            feature_lon[k] = lon[x]
     
     # Convert to polar stereographic coordinates
     if pscoords:
-        featurelat, featurelon = ll2ps(featurelat, featurelon)
+        feature_lat, feature_lon = ll2ps(feature_lat, feature_lon)
 
     # Convert to polar stereographic kilometers
     if kmout:
-        featurelon = featurelon / 1000
-        featurelat = featurelat / 1000
+        feature_lon = feature_lon / 1000
+        feature_lat = feature_lat / 1000
 
     # Returning only latitude or only x would not make any sense,
     # so if no outputs are requested, or if only one output is requested,
     # return as a lat column and lon column or [x y]
-    if len(featurename) == 1:
-        varargout = np.column_stack((featurelat, featurelon))
+    if len(feature_name) == 1:
+        varargout = np.column_stack((feature_lat, feature_lon))
         return varargout[0]
     else:
-        varargout = [featurelat, featurelon]
+        varargout = [feature_lat, feature_lon]
         return varargout
 
 
 # In[ ]:
 
 
-def strlookup(featurename, names):
-    featurename = featurename.lower()  # Convert featurename to lowercase for case-insensitive matching
+def str_lookup(feature_name, names):
+    feature_name = feature_name.lower()  # Convert feature_name to lowercase for case-insensitive matching
 
-    indices = [i for i, name in enumerate(names) if featurename in name.lower()]
+    indices = [i for i, name in enumerate(names) if feature_name in name.lower()]
 
     if len(indices) > 0:
         x = indices[0]  # Choose the first matching index
@@ -182,33 +182,33 @@ def strlookup(featurename, names):
 # In[ ]:
 
 
-def handle_missing_feature(featurename, NearbyNames):
+def handle_missing_feature(feature_name, NearbyNames):
     fmsg = [
-        f'"{featurename}" not found.',
-        f'Are you sure that "{featurename}" exists in Antarctica?',
+        f'"{feature_name}" not found.',
+        f'Are you sure that "{feature_name}" exists in Antarctica?',
         'Did a cat walk across your keyboard?',
         'This is the real reason one shouldn\'t text and drive. Check your spelling and try again.',
         'Now you\'re just making things up.',
-        f'SCAR has identified more than 25,000 features in Antarctica, but "{featurename}" is not one of them.',
-        f'Can\'t find "{featurename}".',
-        f'"{featurename}" may exist somewhere in the world, but you won\'t find it in Antarctica.',
-        f'It is possible that Robert F. Scott named something in Antarctica "{featurename}", but if he did there are no records of it.',
-        f'You must be thinking of {featurename}, Kansas, because {featurename}, Antarctica does not exist.',
-        f'Sure, they used to just call it {featurename}, but not anymore, what with political correctness and all.',
-        f'"{featurename}" is an interesting combination of letters, but I don\'t think it\'s any place in Antarctica.',
-        f'The great Wayne Cochran once sang, "Where oh where can my {featurename} be?" Because it\'s not in Antarctica.',
-        f'I\'m pretty sure it is in violation of the Antarctic Treaty to refer to any place as "{featurename}".',
-        f'"{featurename}" does not match any entries in the SCAR database.',
-        f'Science is all about formality, so the bigwigs will surely look down their noses at such colloquial jargon as "{featurename}".',
-        f'My doctor said I need to get my {featurename} removed.',
+        f'SCAR has identified more than 25,000 features in Antarctica, but "{feature_name}" is not one of them.',
+        f'Can\'t find "{feature_name}".',
+        f'"{feature_name}" may exist somewhere in the world, but you won\'t find it in Antarctica.',
+        f'It is possible that Robert F. Scott named something in Antarctica "{feature_name}", but if he did there are no records of it.',
+        f'You must be thinking of {feature_name}, Kansas, because {feature_name}, Antarctica does not exist.',
+        f'Sure, they used to just call it {feature_name}, but not anymore, what with political correctness and all.',
+        f'"{feature_name}" is an interesting combination of letters, but I don\'t think it\'s any place in Antarctica.',
+        f'The great Wayne Cochran once sang, "Where oh where can my {feature_name} be?" Because it\'s not in Antarctica.',
+        f'I\'m pretty sure it is in violation of the Antarctic Treaty to refer to any place as "{feature_name}".',
+        f'"{feature_name}" does not match any entries in the SCAR database.',
+        f'Science is all about formality, so the bigwigs will surely look down their noses at such colloquial jargon as "{feature_name}".',
+        f'My doctor said I need to get my {feature_name} removed.',
         'Frostbitten Antarctic researcher mistypes again.',
         'This may be an issue of American English versus British English.',
-        f'Antarctica\'s a strange place, but it\'s not science fiction. Verify that "{featurename}" actually exists.',
-        f'What\'s in a name? I\'ll tell you what\'s in a name: That which you call "{featurename}" by any other name may actually exist in Antarctica.',
-        f'Did John Carpenter tell you\'ll find "{featurename}" in Antarctica?',
-        f'You know, some folks say glaciology is a shrinking field, but I say things are just heating up. In other news, "{featurename}" does not exist.',
-        f'You\'re a glaciologist? Isn\'t that a slow-moving field? Also, I have to tell you, I can\'t seem to find any record of "{featurename}".',
-        f'Amazing glaciology, how sweet the sound... "{featurename}" once was lost, and still has not been found.'
+        f'Antarctica\'s a strange place, but it\'s not science fiction. Verify that "{feature_name}" actually exists.',
+        f'What\'s in a name? I\'ll tell you what\'s in a name: That which you call "{feature_name}" by any other name may actually exist in Antarctica.',
+        f'Did John Carpenter tell you\'ll find "{feature_name}" in Antarctica?',
+        f'You know, some folks say glaciology is a shrinking field, but I say things are just heating up. In other news, "{feature_name}" does not exist.',
+        f'You\'re a glaciologist? Isn\'t that a slow-moving field? Also, I have to tell you, I can\'t seem to find any record of "{feature_name}".',
+        f'Amazing glaciology, how sweet the sound... "{feature_name}" once was lost, and still has not been found.'
     ]
 
     rngstart = seed()  # get initial rng setting before changing it temporarily.
@@ -236,10 +236,10 @@ def ll2ps(lat, lon, **kwargs):
     lambda_0 = kwargs.get('meridian', 0)
 
     # Convert degrees to radians
-    lat_rad = np.deg2rad(lat)
-    lon_rad = np.deg2rad(lon)
-    lambda_0_rad = np.deg2rad(lambda_0)
-    phi_c_rad = np.deg2rad(phi_c)
+    lat_rad = np.deg_2_rad(lat)
+    lon_rad = np.deg_2_rad(lon)
+    lambda_0_rad = np.deg_2_rad(lambda_0)
+    phi_c_rad = np.deg_2_rad(phi_c)
 
     # Calculate m and t values
     m_c = np.cos(phi_c_rad) / np.sqrt(1 - e ** 2 * (np.sin(phi_c_rad) ** 2))
@@ -337,7 +337,7 @@ def ps2ll(x, y, **kwargs):
 # In[ ]:
 
 
-def islatlon(lat, lon):
+def is_lat_lon(lat, lon):
     """
     Determines whether lat, lon is likely to represent geographical
     coordinates.
@@ -403,6 +403,43 @@ def quivermc(lat, lon, u, v, **kwargs):
     plt.quiver(lon, lat, u, v, magnitude, **kwargs)
     plt.show()
 
+
+def quiverps(lat, lon, u, v, **kwargs):
+    """
+    This function creates a quiver plot in polar stereographic coordinates, similar to the quiverps function in MATLAB.
+
+    Parameters:
+    lat (array-like): The latitudes at which to plot vectors.
+    lon (array-like): The longitudes at which to plot vectors.
+    u (array-like): The zonal components of the vectors.
+    v (array-like): The meridional components of the vectors.
+    **kwargs: Additional keyword arguments to pass to plt.quiver.
+
+    Returns:
+    None
+    """
+
+    # Create a figure and axes
+    fig, ax = plt.subplots(subplot_kw={'projection': ccrs.SouthPolarStereo()}, figsize=(10, 10))
+
+    # Handle NaN values
+    u = np.nan_to_num(u)
+    v = np.nan_to_num(v)
+
+    # Calculate the magnitude of the vectors
+    magnitude = np.sqrt(u ** 2 + v ** 2)
+
+    # Create a polar stereographic CRS
+    crs = ccrs.SouthPolarStereo()
+
+    # Create a transform object
+    transform = ccrs.PlateCarree()._as_mpl_transform(ax)
+
+    # Add the quiver plot to the axes
+    ax.quiver(lon, lat, u, v, magnitude, transform=ccrs.PlateCarree(), **kwargs)
+
+    # Display the plot.
+    plt.show()
 
 # In[ ]:
 
@@ -552,7 +589,7 @@ def find2drange(X, Y, xi, yi, extraIndices=(0, 0)):
 # In[ ]:
 
 
-def geoquadps(ax, latlim, lonlim, plotkm=False, **kwargs):
+def geoquadps(ax, latlim, lonlim, plot_km=False, **kwargs):
     assert len(latlim) == 2 and len(lonlim) == 2, "Error: latlim and lonlim must each be two-element arrays."
     assert all(-90 <= lat <= 90 for lat in latlim) and all(-180 <= lon <= 180 for lon in lonlim), "Error: latlim and lonlim must be geographic coordinates."
 
@@ -580,7 +617,7 @@ def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereograp
         if isinstance(CenterLon,(float,int)):
             CenterLon = np.array([CenterLon])
 
-        if islatlon(CenterLat,CenterLon):
+        if is_lat_lon(CenterLat,CenterLon):
             [centerx,centery] = ll2ps(CenterLat,CenterLon)
         else:
             centerx = CenterLat
@@ -590,7 +627,7 @@ def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereograp
         resolution_km =r_km
 
     else:
-        [centerx,centery] = scarloc(CenterLat,'xy')
+        [centerx,centery] = scar_loc(CenterLat,'xy')
         width_km= w_km
         resolution_km =r_km
 
@@ -664,13 +701,13 @@ def uv2vxvy(lat_or_x, lon_or_y, u, v):
         v), 'All inputs to uv2vxvy must be of equal dimensions.'
 
     # Parse inputs
-    if islatlon(lat_or_x, lon_or_y):
+    if is_lat_lon(lat_or_x, lon_or_y):
         lon = lon_or_y  # lat is really just a placeholder to make the function a little more intuitive to use. It is not necessary for calculation.
     else:
         _, lon = ps2ll(lat_or_x, lon_or_y)
 
     # Convert lon to radians
-    lon_rad = np.deg2rad(lon)
+    lon_rad = np.deg_2_rad(lon)
 
     # Perform calculation
     vx = u * np.cos(lon_rad) + v * np.sin(lon_rad)
@@ -679,7 +716,7 @@ def uv2vxvy(lat_or_x, lon_or_y, u, v):
     return vx, vy
 
 
-def pathdist(lat, lon, units='m', track='gc', refpoint=None):
+def path_dist(lat, lon, units='m', track='gc', refpoint=None):
     assert len(lat) == len(lon), 'Length of lat and lon must match.'
     assert len(lat) > 1, 'lat and lon must have more than one point.'
 
@@ -763,7 +800,7 @@ def psdistortion(lat, true_lat=-71):
     return m
 
 
-def pathdistps(lat_or_x, lon_or_y, *args):
+def path_distps(lat_or_x, lon_or_y, *args):
     # Initialize variables
     lat_or_x = np.array(lat_or_x)
     lon_or_y = np.array(lon_or_y)
@@ -780,7 +817,7 @@ def pathdistps(lat_or_x, lon_or_y, *args):
             refcoord = arg
 
     # Convert geo coordinates to polar stereographic if necessary
-    if islatlon(lat_or_x, lon_or_y):
+    if is_lat_lon(lat_or_x, lon_or_y):
         lat = lat_or_x
         [x, y] = ll2ps(lat_or_x, lon_or_y)
     else:
@@ -815,14 +852,14 @@ def pspath(lat_or_x, lon_or_y, spacing, method='linear'):
     assert lat_or_x.shape == lon_or_y.shape, 'Input error: dimensions of input coordinates must match.'
     assert np.isscalar(spacing), 'Input error: spacing must be a scalar.'
 
-    geoin = islatlon(lat_or_x, lon_or_y)
+    geoin = is_lat_lon(lat_or_x, lon_or_y)
     if geoin:
         x, y = ll2ps(lat_or_x, lon_or_y)
     else:
         x = lat_or_x
         y = lon_or_y
 
-    d = pathdistps(x, y)
+    d = path_distps(x, y)
 
     # Create interpolation function based on method
     func_x = interp1d(d, x, kind=method, fill_value="extrapolate")
@@ -844,11 +881,11 @@ def pspath(lat_or_x, lon_or_y, spacing, method='linear'):
     return out1, out2
 
 
-def pathcrossingps71(lat1, lon1, lat2, lon2, clip_option=None):
-    assert isinstance(lat1, list) and all(isinstance(i, float) for i in lat1), 'Input lat1 must be a list of floats.'
-    assert len(lat1) == len(lon1), 'Input lat1 and lon1 must be the same size.'
-    assert isinstance(lat2, list) and all(isinstance(i, float) for i in lat2), 'Input lat2 must be a list of floats.'
-    assert len(lat2) == len(lon2), 'Input lat2 and lon2 must be the same size.'
+def path_crossing_ps71(lat_1, lon1, lat_2, lon2, clip_option=None):
+    assert isinstance(lat_1, list) and all(isinstance(i, float) for i in lat_1), 'Input lat_1 must be a list of floats.'
+    assert len(lat_1) == len(lon1), 'Input lat_1 and lon1 must be the same size.'
+    assert isinstance(lat_2, list) and all(isinstance(i, float) for i in lat_2), 'Input lat_2 must be a list of floats.'
+    assert len(lat_2) == len(lon2), 'Input lat_2 and lon2 must be the same size.'
 
     clip_data = True
     if clip_option is not None:
@@ -857,10 +894,10 @@ def pathcrossingps71(lat1, lon1, lat2, lon2, clip_option=None):
 
     # Transform to polar stereo coordinates with standard parallel at 71 S
     # Here we assume that ll2ps and ps2ll are already defined functions
-    x1, y1 = ll2ps(lat1, lon1)
-    x2, y2 = ll2ps(lat2, lon2)
+    x1, y1 = ll2ps(lat_1, lon1)
+    x2, y2 = ll2ps(lat_2, lon2)
 
-    # Delete faraway points before performing InterX function for large data sets
+    # Delete faraway points before performing inter_x function for large data sets
     # This part of code is omitted for brevity and because it is an optimization
     if clip_data:
         if len(x1) * len(x2) > 1e6:
@@ -875,10 +912,10 @@ def pathcrossingps71(lat1, lon1, lat2, lon2, clip_option=None):
                 x2, y2 = clip_outliers(x2, y2, y1, stdy2, 'y')
 
     # Find intersection x,y point(s)
-    # Here we assume that InterX is already defined function
-    P = InterX([x1, y1], [x2, y2])
+    # Here we assume that inter_x is already defined function
+    P = inter_x([x1, y1], [x2, y2])
 
-    # If InterX returns None, try using shared_paths
+    # If inter_x returns None, try using shared_paths
     if P is None:
         line1 = LineString(np.column_stack([x1, y1]))
         line2 = LineString(np.column_stack([x2, y2]))
@@ -914,7 +951,7 @@ def clip_outliers(x, y, x_compare, std, axis):
     return x, y
 
 
-def InterX(L1, L2):
+def inter_x(L1, L2):
     line1 = LineString(np.column_stack(L1))
     line2 = LineString(np.column_stack(L2))
     intersection = line1.intersection(line2)
@@ -933,7 +970,7 @@ def InterX(L1, L2):
         return intersections
 
 
-def antbounds():
+def ant_bounds():
     fig, ax = plt.subplots(figsize=(10, 10),
                            subplot_kw={'projection': ccrs.Stereographic(central_longitude=0, central_latitude=-90)})
     ax.set_extent([-180, 180, -90, -60], ccrs.PlateCarree())
@@ -946,7 +983,7 @@ def antbounds():
     return ax
 
 
-def plotps(ax, lat, lon, km=False, **kwargs):
+def plot_ps(ax, lat, lon, km=False, **kwargs):
     if np.isscalar(lat):
         lat = [lat]
     if np.isscalar(lon):
@@ -973,7 +1010,7 @@ def pcolorps(ax, x, y, Z, **kwargs):
     return h
 
 
-def plot3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
+def plot_3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
     # going to make a function to load bedmachine data, will solved unresolved references
 
     if not isinstance(lat, (list, tuple, np.ndarray)):
@@ -981,8 +1018,8 @@ def plot3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
         lon = [lon]
     else:
         assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
-    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
-    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plot_ps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plot_ps requires numeric inputs first."
 
     psx, psy = ll2ps(lat, lon, **kwargs)
 
@@ -1008,7 +1045,7 @@ def plot3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
     plt.show()
 
 
-def circleps(ax, lons, lats, radii, km=False, **kwargs):
+def circle_ps(ax, lons, lats, radii, km=False, **kwargs):
     geodetic = ccrs.Geodetic(globe=ccrs.Globe(datum='WGS84'))
 
     if km:
@@ -1029,16 +1066,16 @@ def circleps(ax, lons, lats, radii, km=False, **kwargs):
         ax.plot(circle_points[:, 0], circle_points[:, 1], transform=geodetic, **kwargs)
 
 
-def patchps(m, lat, lon, ax=None, color='b', **kwargs):
+def patch_ps(m, lat, lon, ax=None, color='b', **kwargs):
     # Set default values
-    plotkm = kwargs.get('plotkm', False)
+    plot_km = kwargs.get('plot_km', False)
     meridian = kwargs.get('meridian', 0)
 
     # Convert units and plot:
     x, y = m(lon, lat)
 
     # Convert to kilometers if requested:
-    if plotkm:
+    if plot_km:
         x = x / 1000
         y = y / 1000
 
@@ -1051,15 +1088,15 @@ def patchps(m, lat, lon, ax=None, color='b', **kwargs):
     return poly
 
 
-def scarlabel(ax, featurename, plotkm = False, *args, **kwargs):
+def scar_label(ax, feature_name, plot_km = False, *args, **kwargs):
     # Check if at least one input is provided
-    assert len(featurename) > 0, "The scarlabel requires at least one input. What are you trying to label?"
+    assert len(feature_name) > 0, "The scar_label requires at least one input. What are you trying to label?"
 
-    # Check if the featurename is a string or a list of strings
-    if isinstance(featurename, str):
-        featurename = [featurename]
-    elif isinstance(featurename, list):
-        assert all(isinstance(name, str) for name in featurename), "Feature names must be strings."
+    # Check if the feature_name is a string or a list of strings
+    if isinstance(feature_name, str):
+        feature_name = [feature_name]
+    elif isinstance(feature_name, list):
+        assert all(isinstance(name, str) for name in feature_name), "Feature names must be strings."
     else:
         raise ValueError("Feature names must be a string or a list of strings.")
 
@@ -1069,8 +1106,8 @@ def scarlabel(ax, featurename, plotkm = False, *args, **kwargs):
         marker_style = args[args.index('marker') + 1]
         args.remove('marker')
 
-    featurelat, featurelon = [], []
-    for name in featurename:
+    feature_lat, feature_lon = [], []
+    for name in feature_name:
         if name.lower() == 'glaciers':
             data = np.load('scarnames.npz')
             lat = data['lat']
@@ -1078,8 +1115,8 @@ def scarlabel(ax, featurename, plotkm = False, *args, **kwargs):
             names = data['names']
             featureType = data['featureType']
             ind = np.where(featureType == 'glacier')[0]
-            featurelat.extend(lat[ind])
-            featurelon.extend(lon[ind])
+            feature_lat.extend(lat[ind])
+            feature_lon.extend(lon[ind])
         elif name.lower() == 'ice shelves':
             data = np.load('scarnames.npz')
             lat = data['lat']
@@ -1087,20 +1124,20 @@ def scarlabel(ax, featurename, plotkm = False, *args, **kwargs):
             names = data['names']
             featureType = data['featureType']
             ind = np.where(featureType == 'ice shelf')[0]
-            featurelat.extend(lat[ind])
-            featurelon.extend(lon[ind])
+            feature_lat.extend(lat[ind])
+            feature_lon.extend(lon[ind])
         else:
-            lat, lon = scarloc(name)
-            featurelat.append(lat)
-            featurelon.append(lon)
+            lat, lon = scar_loc(name)
+            feature_lat.append(lat)
+            feature_lon.append(lon)
 
-    if plotkm:
-        featurelon = [lo / 1000 for lo in featurelon]
-        featurelat = [la / 1000 for la in featurelat]
+    if plot_km:
+        feature_lon = [lo / 1000 for lo in feature_lon]
+        feature_lat = [la / 1000 for la in feature_lat]
 
     # Place text label
-    for i in range(len(featurename)):
-        ax.text(featurelon[i], featurelat[i], featurename[i], horizontalalignment='center', verticalalignment='top', transform=ccrs.PlateCarree(), **kwargs)
+    for i in range(len(feature_name)):
+        ax.text(feature_lon[i], feature_lat[i], feature_name[i], horizontalalignment='center', verticalalignment='top', transform=ccrs.PlateCarree(), **kwargs)
 
     # Format text and marker
     for i in range(len(args)):
@@ -1108,7 +1145,7 @@ def scarlabel(ax, featurename, plotkm = False, *args, **kwargs):
             ax.setp(ax.gca().texts[i], **{args[i]: args[i + 1]})
 
     if plot_marker:
-        ax.scatter(featurelon, featurelat, marker=marker_style, transform=ccrs.PlateCarree())
+        ax.scatter(feature_lon, feature_lat, marker=marker_style, transform=ccrs.PlateCarree())
 
     return ax
 
@@ -1168,15 +1205,15 @@ def ps2wkt(lati_or_xi, loni_or_yi, filename=None):
         return np.array(lati), np.array(loni)
 
 
-def scatterps(ax, lat, lon, s=100, c='b', km=False, **kwargs):
+def scatter_ps(ax, lat, lon, s=100, c='b', km=False, **kwargs):
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
     else:
         assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
-    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "scatterps requires numeric inputs first."
-    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "scatterps requires numeric inputs first."
-    assert np.max(np.abs(lat)) <= 90, "I suspect you have entered silly data into plotps because some of your latitudes have absolute values exceeding 90 degrees."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "scatter_ps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "scatter_ps requires numeric inputs first."
+    assert np.max(np.abs(lat)) <= 90, "I suspect you have entered silly data into plot_ps because some of your latitudes have absolute values exceeding 90 degrees."
 
     # If 'km' is present in kwargs, convert coordinates from meters to kilometers
     if km:
@@ -1187,14 +1224,14 @@ def scatterps(ax, lat, lon, s=100, c='b', km=False, **kwargs):
     ax.scatter(lon, lat, s=s, c=c, transform=ccrs.PlateCarree(), **kwargs)
 
 
-def surfps(lat, lon, x, y, z, plot_km=False, meridian=0, extra_dist=50e3, **kwargs):
+def surf_ps(lat, lon, x, y, z, plot_km=False, meridian=0, extra_dist=50e3, **kwargs):
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
     else:
         assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
-    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
-    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plotps requires numeric inputs first."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plot_ps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plot_ps requires numeric inputs first."
 
     psx, psy = ll2ps(lat, lon, **kwargs)
 
