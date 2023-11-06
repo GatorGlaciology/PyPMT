@@ -1294,3 +1294,66 @@ def greenland_bounds():
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS)
     return ax
+
+
+def graticuleps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwargs):
+    if lats is None:
+        lats = [-85] + list(range(-80, -20, 10))
+    if lons is None:
+        lons = list(range(-150, 210, 30))
+
+    num_pts = 360  # 360 points per line
+
+    # create lat/lon points of all lines
+    lat = np.empty(len(lats) * num_pts + len(lats) + len(lons) * num_pts + len(lons) - 1, dtype=float)
+    lat.fill(np.nan)
+
+    lon = np.empty(len(lats) * num_pts + len(lats) + len(lons) * num_pts + len(lons) - 1, dtype=float)
+    lon.fill(np.nan)
+
+    n = 0
+
+    for k in range(len(lats)):
+        lat[n:n + num_pts] = lats[k]
+        lon[n:n + num_pts] = np.linspace(-180, 180, num_pts)
+        n += num_pts + 1
+
+    for k in range(len(lons)):
+        lon[n:n + num_pts] = lons[k]
+        lat[n:n + num_pts] = np.linspace(np.min(lats), np.max(lats), num_pts)
+        n += num_pts + 1
+
+    # Get current axis limits
+    if ax is None:
+        ax = plt.gca()
+    ax_limits = ax.axis()
+
+    # Check if a map was already open
+    if ax_limits != [0, 1, 0, 1]:
+        map_was_open = True
+        # If user requests polar stereographic kilometers, we have to convert current axis limits to km for comparison:
+        if 'km' in kwargs:
+            ax_limits = ax_limits * 1000
+        # If clipping is true, clip the graticule to the current axis limits
+        if clipping:
+            # Find indices of lat, lon inside current axis limits
+            ind = np.where(
+                (lat >= ax_limits[0]) & (lat <= ax_limits[1]) & (lon >= ax_limits[2]) & (lon <= ax_limits[3]))
+            # Set everything outside current axis limits to NaN
+            lat[~np.isin(np.arange(len(lat)), ind)] = np.nan
+            lon[~np.isin(np.arange(len(lon)), ind)] = np.nan
+    else:
+        map_was_open = False
+
+    plotps(ax, lat, lon, color='gray')
+
+
+def plotps(ax, lat, lon, km=False, **kwargs):
+    if np.isscalar(lat):
+        lat = [lat]
+    if np.isscalar(lon):
+        lon = [lon]
+    x, y = ll2ps(lat, lon)
+    if km:
+        x, y = x / 1000, y / 1000
+    return ax.plot(x, y, **kwargs)
