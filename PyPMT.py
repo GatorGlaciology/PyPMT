@@ -498,54 +498,42 @@ def base2freeboard(B, rhoi=917, rhow=1027, rhos=350, Ts=0):
 # In[ ]:
 
 
-def contourfps(lat, lon, Z, levels=None, plot_km=False, meridian=0, cmap='viridis'):
+def contourps(lat, lon, Z, n=None, v=None, line_spec=None, plot_km=False, meridian=0, ax=None, fill=False):
     # Convert lat, lon to polar stereographic coordinates
-    x, y = ll2ps(lat, lon)
-
-    # Convert to kilometers if user requested:
-    if plot_km:
-        x = x / 1000
-        y = y / 1000
-
-    # Create the contour plot
-    fig, ax = plt.subplots()
-    if levels is not None:
-        cs = ax.contourf(x, y, Z, levels=levels, cmap=cmap)
-    else:
-        cs = ax.contourf(x, y, Z, cmap=cmap)
-        
-    plt.colorbar(cs)
-
-    plt.show()
-
-
-# In[ ]:
-
-
-def contourps(lat, lon, Z, n=None, v=None, line_spec=None, plot_km=False, meridian=0):
-    # Convert lat, lon to polar stereographic coordinates
-    x, y = ll2ps(lat, lon)
+    x, y = lat, lon
+    # print(x)
 
     # Convert to kilometers if requested:
     if plot_km:
         x = x / 1000
         y = y / 1000
 
-    # Create the contour plot
-    fig, ax = plt.subplots()
+    if ax is None:
+        # Create the contour plot
+        fig, ax = plt.subplots()
 
-    if n is not None:
-        cs = ax.contour(x, y, Z, n)
-    elif v is not None:
-        cs = ax.contour(x, y, Z, v)
+    if not fill:
+        if n is not None:
+            cs = ax.contour(x, y, Z, n)
+        elif v is not None:
+            cs = ax.contour(x, y, Z, v)
+        else:
+            cs = ax.contour(x, y, Z)
     else:
-        cs = ax.contour(x, y, Z)
-    
+        if n is not None:
+            cs = ax.contourf(x, y, Z, n)
+        elif v is not None:
+            cs = ax.contourf(x, y, Z, v)
+        else:
+            cs = ax.contourf(x, y, Z)
+
     if line_spec is not None:
         for line in cs.collections:
             line.set_linestyle(line_spec)
 
-    plt.show()
+    if ax is None:
+        plt.show()
+
     return cs
 
 
@@ -1288,7 +1276,7 @@ def surf_ps(lat, lon, x, y, z, plot_km=False, meridian=0, extra_dist=50e3, **kwa
 
 def greenland_bounds():
     fig = plt.figure(figsize=(10, 10))
-    map_proj = ccrs.Orthographic(central_longitude=-45.0, central_latitude=75.0)
+    map_proj = ccrs.Orthographic(central_longitude=-45.0, central_latitude=70.0)
     ax = fig.add_subplot(1, 1, 1, projection=map_proj)
     ax.set_extent([-74, -11, 59, 83], ccrs.PlateCarree()) # Adjust the extent as needed
     ax.add_feature(cfeature.COASTLINE)
