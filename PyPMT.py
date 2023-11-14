@@ -933,8 +933,8 @@ def plot_ps(ax, lat, lon, km=False, **kwargs):
     return ax.plot(x, y, **kwargs)
 
 
-def pcolor_ps(ax, x, y, Z, **kwargs):
-    if len([x, y, Z]) < 3:
+def pcolor_ps(ax, x, y, z, **kwargs):
+    if len([x, y, z]) < 3:
         raise ValueError('The pcolor_ps function requires at least three inputs: x, y, and Z.')
 
     if not np.issubdtype(np.array(x).dtype, np.number):
@@ -944,7 +944,7 @@ def pcolor_ps(ax, x, y, Z, **kwargs):
         raise ValueError('pcolor_ps requires numeric inputs for y.')
 
     # Create a pseudo color plot
-    h = ax.pcolormesh(x, y, Z, **kwargs)
+    h = ax.pcolormesh(x, y, z, **kwargs)
 
     return h
 
