@@ -62,12 +62,12 @@ def str_lookup(feature_name, names):
 
     if len(indices) > 0:
         x = indices[0]  # Choose the first matching index
-        NearbyNames = [names[i] for i in indices]  # Get all matching names
+        nearby_names = [names[i] for i in indices]  # Get all matching names
     else:
         x = None
-        NearbyNames = []
+        nearby_names = []
 
-    return x, NearbyNames
+    return x, nearby_names
 
 
 def scar_loc(feature_name, *varargin):
@@ -98,7 +98,7 @@ def scar_loc(feature_name, *varargin):
 
     # Look for each feature name
     for k in range(len(feature_lat)):
-        x, NearbyNames = str_lookup(feature_name[k], names)
+        x, nearby_names = str_lookup(feature_name[k], names)
         if x is None and OfferHelp:
             fmsg = [
                 f'"{feature_name[k]}" not found.',
@@ -130,9 +130,9 @@ def scar_loc(feature_name, *varargin):
 
             np.random.shuffle(fmsg)
             print(fmsg[0])
-            if NearbyNames:
+            if nearby_names:
                 print('Here are the best matches I can find:')
-                print(NearbyNames)
+                print(nearby_names)
             else:
                 print('Try typing "load scarnames" to explore the available list of features.')
             return
@@ -171,18 +171,18 @@ def str_lookup(feature_name, names):
 
     if len(indices) > 0:
         x = indices[0]  # Choose the first matching index
-        NearbyNames = [names[i] for i in indices]  # Get all matching names
+        nearby_names = [names[i] for i in indices]  # Get all matching names
     else:
         x = None
-        NearbyNames = []
+        nearby_names = []
 
-    return x, NearbyNames
+    return x, nearby_names
 
 
 # In[ ]:
 
 
-def handle_missing_feature(feature_name, NearbyNames):
+def handle_missing_feature(feature_name, nearby_names):
     fmsg = [
         f'"{feature_name}" not found.',
         f'Are you sure that "{feature_name}" exists in Antarctica?',
@@ -216,9 +216,9 @@ def handle_missing_feature(feature_name, NearbyNames):
     print(random_msg)
     seed(rngstart)  # returns to original rng settings.
 
-    if NearbyNames:
+    if nearby_names:
         print('Here are the best matches I can find:')
-        print(NearbyNames)
+        print(nearby_names)
     else:
         print('Try typing "load scarnames" to explore the available list of features.')
 
@@ -311,9 +311,9 @@ def ps2ll(x, y, **kwargs):
 
     # Calculate lat
     lat = chi + (e ** 2 / 2 + 5 * e ** 4 / 24 + e ** 6 / 12 + 13 * e ** 8 / 360) * np.sin(2 * chi) \
-          + (7 * e ** 4 / 48 + 29 * e ** 6 / 240 + 811 * e ** 8 / 11520) * np.sin(4 * chi) \
-          + (7 * e ** 6 / 120 + 81 * e ** 8 / 1120) * np.sin(6 * chi) \
-          + (4279 * e ** 8 / 161280) * np.sin(8 * chi)
+        + (7 * e ** 4 / 48 + 29 * e ** 6 / 240 + 811 * e ** 8 / 11520) * np.sin(4 * chi) \
+        + (7 * e ** 6 / 120 + 81 * e ** 8 / 1120) * np.sin(6 * chi) \
+        + (4279 * e ** 8 / 161280) * np.sin(8 * chi)
 
     # Calculate lon
     lon = lambda_0 + np.arctan2(x, -y)
@@ -444,35 +444,35 @@ def quiverps(lat, lon, u, v, **kwargs):
 # In[ ]:
 
 
-def thickness2freeboard(T, **kwargs):
-    """thickness2freeboard estimates freeboard height above sea level, from ice thickness 
+def thickness_2_freeboard(t, **kwargs):
+    """thickness_2_freeboard estimates freeboard height above sea level, from ice thickness
     assuming hyrostatic equilibrium. """
     rhoi = kwargs.get('rhoi', 917)
     rhow = kwargs.get('rhow', 1027)
     rhos = kwargs.get('rhos', 350)
-    Ts = kwargs.get('Ts', 0)
-    F = (T + Ts * (rhow - rhos) / (rhow - rhoi)) / (rhow / (rhow - rhoi)) # perform the calculation
-    return round(F, 2)
+    ts = kwargs.get('ts', 0)
+    f = (t + ts * (rhow - rhos) / (rhow - rhoi)) / (rhow / (rhow - rhoi))  # perform the calculation
+    return round(f, 2)
 
 
 # In[ ]:
 
 
-def freeboard2thickness(F, **kwargs):
-    """freeboard2thickness estimates ice thickness from height above sea level,
+def freeboard_2_thickness(f, **kwargs):
+    """freeboard_2_thickness estimates ice thickness from height above sea level,
     assuming hyrostatic equilibrium. """
     rhoi = kwargs.get('rhoi', 917)
     rhow = kwargs.get('rhow', 1027)
     rhos = kwargs.get('rhos', 350)
-    Ts = kwargs.get('Ts', 0)
-    T = (F * rhow / (rhow - rhoi)) - Ts * (rhow - rhos) / (rhow - rhoi)
-    return round(T, 2)
+    ts = kwargs.get('ts', 0)
+    t = (f * rhow / (rhow - rhoi)) - ts * (rhow - rhos) / (rhow - rhoi)
+    return round(t, 2)
 
 
 # In[ ]:
 
 
-def base2freeboard(B, rhoi=917, rhow=1027, rhos=350, Ts=0):
+def base_2_free_board(B, rhoi=917, rhow=1027, rhos=350, ts=0):
     """
     Estimates freeboard height above sea level, from ice basal elevation,
     assuming hydrostatic equilibrium.
@@ -482,23 +482,23 @@ def base2freeboard(B, rhoi=917, rhow=1027, rhos=350, Ts=0):
     rhoi (float): Ice density in kg/m^3. Default is 917 kg/m^3.
     rhow (float): Water density in kg/m^3. Default is 1027 kg/m^3.
     rhos (float): Snow density in kg/m^3. Default is 350 kg/m^3.
-    Ts (float): Snow thickness in meters. Default is 0 m.
+    ts (float): Snow thickness in meters. Default is 0 m.
 
     Returns:
     float: Freeboard height above sea level in meters.
     """
-    F = (B - Ts * ((rhow - rhos) / (rhow - rhoi))) / (1 - rhow / (rhow - rhoi))
+    f = (B - ts * ((rhow - rhos) / (rhow - rhoi))) / (1 - rhow / (rhow - rhoi))
 
-    if F < 0:
+    if f < 0:
         return float("NaN")  # Assume any base elevations above sea level are error or rock
     else:
-        return round(F, 2)
+        return round(f, 2)
 
 
 # In[ ]:
 
 
-def contourps(lat, lon, Z, n=None, v=None, line_spec=None, plot_km=False, meridian=0, ax=None, fill=False):
+def contour_ps(lat, lon, z, n=None, v=None, line_spec=None, plot_km=False, meridian=0, ax=None, fill=False):
     # Convert lat, lon to polar stereographic coordinates
     x, y = lat, lon
     # print(x)
@@ -514,18 +514,18 @@ def contourps(lat, lon, Z, n=None, v=None, line_spec=None, plot_km=False, meridi
 
     if not fill:
         if n is not None:
-            cs = ax.contour(x, y, Z, n)
+            cs = ax.contour(x, y, z, n)
         elif v is not None:
-            cs = ax.contour(x, y, Z, v)
+            cs = ax.contour(x, y, z, v)
         else:
-            cs = ax.contour(x, y, Z)
+            cs = ax.contour(x, y, z)
     else:
         if n is not None:
-            cs = ax.contourf(x, y, Z, n)
+            cs = ax.contourf(x, y, z, n)
         elif v is not None:
-            cs = ax.contourf(x, y, Z, v)
+            cs = ax.contourf(x, y, z, v)
         else:
-            cs = ax.contourf(x, y, Z)
+            cs = ax.contourf(x, y, z)
 
     if line_spec is not None:
         for line in cs.collections:
@@ -540,38 +540,38 @@ def contourps(lat, lon, Z, n=None, v=None, line_spec=None, plot_km=False, meridi
 # In[ ]:
 
 
-def find2drange(X, Y, xi, yi, extraIndices=(0, 0)):
-    assert np.issubdtype(X.dtype, np.number), 'X must be numeric.'
-    assert X.ndim <= 2, 'This function only works for 1D or 2D X and Y arrays.'
-    assert X.shape == Y.shape, 'X and Y must be the same exact size.'
+def find_2d_range(x, y, xi, yi, extra_indices=(0, 0)):
+    assert np.issubdtype(x.dtype, np.number), 'X must be numeric.'
+    assert x.ndim <= 2, 'This function only works for 1D or 2D X and Y arrays.'
+    assert x.shape == y.shape, 'X and Y must be the same exact size.'
     assert np.issubdtype(xi.dtype, np.number), 'xi must be numeric.'
     assert np.issubdtype(yi.dtype, np.number), 'yi must be numeric.'
     
-    extrarows, extracols = extraIndices
-    assert extrarows >= 0, 'extrarows must be a positive integer.'
-    assert extracols >= 0, 'extracols must be a positive integer.'
+    extra_rows, extra_cols = extra_indices
+    assert extra_rows >= 0, 'extrarows must be a positive integer.'
+    assert extra_cols >= 0, 'extracols must be a positive integer.'
 
-    rowsin, colsin = X.shape
+    rows_in, cols_in = x.shape
 
     if len(xi) == 0:
-        xi = [np.min(X), np.max(X)]
+        xi = [np.min(x), np.max(x)]
     else:
         xi = [np.min(xi), np.max(xi)]
 
     if len(yi) == 0:
-        yi = [np.min(Y), np.max(Y)]
+        yi = [np.min(y), np.max(y)]
     else:
         yi = [np.min(yi), np.max(yi)]
 
-    rowi, coli = np.where((X >= xi[0]) & (X <= xi[1]) & (Y >= yi[0]) & (Y <= yi[1]))
+    row_i, col_i = np.where((x >= xi[0]) & (x <= xi[1]) & (y >= yi[0]) & (y <= yi[1]))
 
-    rowrange = np.arange(np.min(rowi) - 1 - extrarows, np.max(rowi) + 2 + extrarows)
-    colrange = np.arange(np.min(coli) - 1 - extracols, np.max(coli) + 2 + extracols)
+    row_range = np.arange(np.min(row_i) - 1 - extra_rows, np.max(row_i) + 2 + extra_rows)
+    col_range = np.arange(np.min(col_i) - 1 - extra_cols, np.max(col_i) + 2 + extra_cols)
 
-    rowrange = rowrange[(rowrange >= 0) & (rowrange < rowsin)]
-    colrange = colrange[(colrange >= 0) & (colrange < colsin)]
+    row_range = row_range[(row_range >= 0) & (row_range < rows_in)]
+    col_range = col_range[(col_range >= 0) & (col_range < cols_in)]
 
-    return rowrange, colrange
+    return row_range, col_range
 
 
 # In[ ]:
@@ -595,82 +595,33 @@ def geoquadps(ax, latlim, lonlim, plot_km=False, **kwargs):
     return ax
 
 
-def psgrid(CenterLat = None,CenterLon = None,w_km = None,r_km = None, stereographic = False):
-    if isinstance(CenterLat,(float,int,np.ndarray)):
+def ps_grid(center_x, center_y, width_km, height_km, resolution_km):
+    center_x = np.array(center_x)
+    center_y = np.array(center_y)
 
+    # Convert width and resolution from km to meters
+    width_m = width_km * 1000
+    height_m = height_km * 1000
+    resolution_m = resolution_km * 1000
 
-        if isinstance(CenterLat,(float,int)):
-            CenterLat = np.array([CenterLat])
+    # Check that resolution is not greater than width
+    assert width_m > resolution_m, "Grid width should be bigger than the grid resolution"
+    assert resolution_m > 0, "Grid resolution must be greater than zero"
+    assert width_m > 0, "Grid width must be greater than zero"
 
-        if isinstance(CenterLon,(float,int)):
-            CenterLon = np.array([CenterLon])
+    if is_lat_lon(center_x, center_y):
+        center_x, center_y = ll2ps(center_x, center_y)
 
-        if is_lat_lon(CenterLat,CenterLon):
-            [centerx,centery] = ll2ps(CenterLat,CenterLon)
-        else:
-            centerx = CenterLat
-            centery = CenterLon
+    # Define x and y values for grid width
+    x = np.arange(center_x - width_m / 2, center_x + width_m / 2, resolution_m)
+    y = np.arange(center_y - height_m / 2, center_y + height_m / 2, resolution_m)
 
-        width_km= w_km
-        resolution_km =r_km
-
-    else:
-        [centerx,centery] = scar_loc(CenterLat,'xy')
-        width_km= w_km
-        resolution_km =r_km
-
-    if isinstance(width_km,(float,int)):
-        width_km = [width_km]
-
-    if isinstance(resolution_km,(float,int)):
-        resolution_km = [resolution_km]
-            
-    if len(width_km) == 1:
-        widthx = width_km[0]*1000 # The *1000 bit converts from km to meters.
-        widthy = width_km[0]*1000
-
-    elif len(width_km) == 2:
-        widthx = width_km[0]*1000
-        widthy = width_km[1]*1000
-    else:
-        raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid width with more than two elements. Check inputs and try again.")
-
-    if len(resolution_km) == 1:
-        resx = resolution_km[0]*1000
-        resy = resolution_km[0]*1000
-
-    elif len(resolution_km) == 2:
-        resx = resolution_km[0]*1000
-        rexy = resolution_km[1]*1000
-    else:
-        raise ValueError("I must have misinterpreted something. As I understand it, you have requested a grid resolution with more than two elements. Check inputs and try again.")
-
-    # Verify that resolution is not greater than width
-    assert widthx > resx, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
-    assert widthy > resy, "It looks like there's an input error because the grid width should be bigger than the grid resolution. Check inputs and try again."
-    assert resx > 0, "Grid resolution must be greater than zero."
-    assert resy > 0, "Grid resolution must be greater than zero."
-    assert widthx > 0, "Grid width must be greater than zero."
-    assert widthy > 0, "Grid width must be greater than zero."
-
-    # Should outputs be polar stereographic?
-
-    outputps = (stereographic == 'xy')
-
-    # Build grid
-    x = np.arange(centerx - widthx/2, centerx + widthx/2 + resx, resx)
-    y = np.arange(centery - widthy/2, centery + widthy/2 + resy, resy)
+    # Create grid
     X, Y = np.meshgrid(x, y)
 
     # Convert coordinates if necessary
-    if outputps:
-        out1 = X
-        out2 = Y
-
-    else:
-        out1, out2 = ps2ll(X, Y)
-
-    return out1, out2
+    lat, lon = ps2ll(X, Y)
+    return lat, lon
 
 
 def uv2vxvy(lat_or_x, lon_or_y, u, v):
@@ -811,7 +762,7 @@ def path_distps(lat_or_x, lon_or_y, *args):
     else:
         x = lat_or_x
         y = lon_or_y
-        lat, _ = ps2ll(x, y) #don't need lon
+        lat, _ = ps2ll(x, y)  # don't need lon
 
     # Perform mathematics:
     m = psdistortion(lat[1:])  # Assuming psdistortion is defined or imported
@@ -835,7 +786,7 @@ def path_distps(lat_or_x, lon_or_y, *args):
     return d
 
 
-def pspath(lat_or_x, lon_or_y, spacing, method='linear'):
+def ps_path(lat_or_x, lon_or_y, spacing, method='linear'):
     assert isinstance(lat_or_x, np.ndarray) and lat_or_x.ndim == 1, 'Input error: input coordinates must be vectors of matching dimensions.'
     assert lat_or_x.shape == lon_or_y.shape, 'Input error: dimensions of input coordinates must match.'
     assert np.isscalar(spacing), 'Input error: spacing must be a scalar.'
@@ -982,24 +933,24 @@ def plot_ps(ax, lat, lon, km=False, **kwargs):
     return ax.plot(x, y, **kwargs)
 
 
-def pcolorps(ax, x, y, Z, **kwargs):
+def pcolor_ps(ax, x, y, Z, **kwargs):
     if len([x, y, Z]) < 3:
-        raise ValueError('The pcolorps function requires at least three inputs: x, y, and Z.')
+        raise ValueError('The pcolor_ps function requires at least three inputs: x, y, and Z.')
 
     if not np.issubdtype(np.array(x).dtype, np.number):
-        raise ValueError('pcolorps requires numeric inputs for x.')
+        raise ValueError('pcolor_ps requires numeric inputs for x.')
 
     if not np.issubdtype(np.array(y).dtype, np.number):
-        raise ValueError('pcolorps requires numeric inputs for y.')
+        raise ValueError('pcolor_ps requires numeric inputs for y.')
 
-    # Create a pseudocolor plot
+    # Create a pseudo color plot
     h = ax.pcolormesh(x, y, Z, **kwargs)
 
     return h
 
 
 def plot_3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
-    # going to make a function to load bedmachine data, will solved unresolved references
+    # going to make a function to load bedmachine data, will solve unresolved references
 
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
@@ -1076,7 +1027,7 @@ def patch_ps(m, lat, lon, ax=None, color='b', **kwargs):
     return poly
 
 
-def scar_label(ax, feature_name, plot_km = False, *args, **kwargs):
+def scar_label(ax, feature_name, plot_km=False, *args, **kwargs):
     # Check if at least one input is provided
     assert len(feature_name) > 0, "The scar_label requires at least one input. What are you trying to label?"
 
@@ -1101,8 +1052,8 @@ def scar_label(ax, feature_name, plot_km = False, *args, **kwargs):
             lat = data['lat']
             lon = data['lon']
             names = data['names']
-            featureType = data['featureType']
-            ind = np.where(featureType == 'glacier')[0]
+            feature_Type = data['featureType']
+            ind = np.where(feature_type == 'glacier')[0]
             feature_lat.extend(lat[ind])
             feature_lon.extend(lon[ind])
         elif name.lower() == 'ice shelves':
@@ -1110,8 +1061,8 @@ def scar_label(ax, feature_name, plot_km = False, *args, **kwargs):
             lat = data['lat']
             lon = data['lon']
             names = data['names']
-            featureType = data['featureType']
-            ind = np.where(featureType == 'ice shelf')[0]
+            feature_type = data['featureType']
+            ind = np.where(feature_type == 'ice shelf')[0]
             feature_lat.extend(lat[ind])
             feature_lon.extend(lon[ind])
         else:
@@ -1278,13 +1229,13 @@ def greenland_bounds():
     fig = plt.figure(figsize=(10, 10))
     map_proj = ccrs.Orthographic(central_longitude=-45.0, central_latitude=70.0)
     ax = fig.add_subplot(1, 1, 1, projection=map_proj)
-    ax.set_extent([-74, -11, 59, 83], ccrs.PlateCarree()) # Adjust the extent as needed
+    ax.set_extent([-74, -11, 59, 83], ccrs.PlateCarree())  # Adjust the extent as needed
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS)
     return ax
 
 
-def graticuleps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwargs):
+def graticule_ps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwargs):
     if lats is None:
         lats = [-85] + list(range(-80, -20, 10))
     if lons is None:
@@ -1333,10 +1284,10 @@ def graticuleps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwarg
     else:
         map_was_open = False
 
-    plotps(ax, lat, lon, color='gray')
+    plot_ps(ax, lat, lon, color='gray')
 
 
-def plotps(ax, lat, lon, km=False, **kwargs):
+def plot_ps(ax, lat, lon, km=False, **kwargs):
     if np.isscalar(lat):
         lat = [lat]
     if np.isscalar(lon):
