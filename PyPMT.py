@@ -33,12 +33,24 @@ from cartopy.feature import NaturalEarthFeature
 # In[ ]:
 
 
-def load_csv_data(filename):
+def load_csv_data(file_name):
+    """
+            Load in a csv file (used in scarloc)
+
+            Parameters
+            ----------
+                file_name : string
+                    path to the file
+
+            Returns
+            -------
+                numpy.ndarrays for latitude, longitude, and location names
+            """
     lat = []
     lon = []
     names = []
 
-    with open(filename, 'r', encoding='utf-8') as csvfile:
+    with open(file_name, 'r', encoding='utf-8') as csvfile:
         csvreader = csv.reader(csvfile)
         next(csvreader)  # Skip header row
 
@@ -56,6 +68,22 @@ def load_csv_data(filename):
 
 
 def str_lookup(feature_name, names):
+    """
+            Search for features by name (used in scarloc)
+
+            Parameters
+            ----------
+                feature_name : string
+                    feature we will be searching for
+                names : np.ndarray
+                    names of features (loaded in with load_csv_data)
+
+            Returns
+            -------
+                x : numpy.ndarray
+                    array containing the lat/lon coordinate results
+            """
+
     feature_name = feature_name.lower()  # Convert feature_name to lowercase for case-insensitive matching
 
     indices = [i for i, name in enumerate(names) if feature_name in name.lower()]
@@ -71,7 +99,20 @@ def str_lookup(feature_name, names):
 
 
 def scar_loc(feature_name, *varargin):
-    
+    """
+            Find lat/lon coordinates of Antarctic features
+
+            Parameters
+            ----------
+                feature_name : string
+                    name of the desired feature
+
+            Returns
+            -------
+                varargout : numpy.ndarray or list
+                    latitude and longitude coordinates
+            """
+
     # Check if feature_name is a list or a single string
     if isinstance(feature_name, str):
         feature_name = [feature_name]
