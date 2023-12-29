@@ -80,8 +80,10 @@ def str_lookup(feature_name, names):
 
             Returns
             -------
-                x : numpy.ndarray
-                    array containing the lat/lon coordinate results
+                x : int
+                    integer of the first index of names that matches feature_name
+                nearby_names : list
+                    items from names that match feature_name
             """
 
     feature_name = feature_name.lower()  # Convert feature_name to lowercase for case-insensitive matching
@@ -201,29 +203,20 @@ def scar_loc(feature_name, *varargin):
         varargout = [feature_lat, feature_lon]
         return varargout
 
-
-# In[ ]:
-
-
-def str_lookup(feature_name, names):
-    feature_name = feature_name.lower()  # Convert feature_name to lowercase for case-insensitive matching
-
-    indices = [i for i, name in enumerate(names) if feature_name in name.lower()]
-
-    if len(indices) > 0:
-        x = indices[0]  # Choose the first matching index
-        nearby_names = [names[i] for i in indices]  # Get all matching names
-    else:
-        x = None
-        nearby_names = []
-
-    return x, nearby_names
-
-
 # In[ ]:
 
 
 def handle_missing_feature(feature_name, nearby_names):
+    """
+                Prints messages to notify users that feature_name is not in the names array.
+
+                Parameters
+                ----------
+                    feature_name : string
+                        name of the desired feature
+                    nearby_names : list
+                        items from names that match feature_name
+                """
     fmsg = [
         f'"{feature_name}" not found.',
         f'Are you sure that "{feature_name}" exists in Antarctica?',
@@ -270,6 +263,23 @@ def handle_missing_feature(feature_name, nearby_names):
 
 
 def ll2ps(lat, lon, **kwargs):
+    """
+                Converts latitude/longitude coordinates to polar stereographic coordinates.
+
+                Parameters
+                ----------
+                    lat : float, int, list of floats/int, or numpy ndarray of floats/int
+                        latitude coordinate(s)
+                    lon : float, int, list of floats/int, or numpy ndarray of floats/int
+                        longitude coordinate(s)
+
+                Returns
+                -------
+                    x : float
+                        calculated x coordinate(s)
+                    y : float
+                        calculated y coordinate(S)
+                """
     # Set default values
     phi_c = kwargs.get('TrueLat', -71)
     a = kwargs.get('EarthRadius', 6378137.0)
@@ -301,6 +311,23 @@ def ll2ps(lat, lon, **kwargs):
 
 
 def ps2ll(x, y, **kwargs):
+    """
+                    Converts polar stereographic coordinates to latitude/longitude coordinates.
+
+                    Parameters
+                    ----------
+                        x : float
+                            calculated x coordinate(s)
+                        y : float
+                            calculated y coordinate(S)
+
+                    Returns
+                    -------
+                        lat : float, int, list of floats/int, or numpy ndarray of floats/int
+                            latitude coordinate(s)
+                        lon : float, or numpy ndarray of floats
+                            longitude coordinate(s)
+                    """
     # Define default values for optional keyword arguments
     phi_c = -71  # standard parallel (degrees)
     a = 6378137.0  # radius of ellipsoid, WGS84 (meters)
@@ -380,16 +407,21 @@ def ps2ll(x, y, **kwargs):
 
 def is_lat_lon(lat, lon):
     """
-    Determines whether lat, lon is likely to represent geographical
-    coordinates.
+                        Determines whether lat, lon is likely to represent geographical coordinates.
 
-    Args:
-        lat (numpy array): Array of latitudes.
-        lon (numpy array): Array of longitudes.
+                        Parameters
+                        ----------
+                            lat : numpy ndarray
+                                array of latitude coordinates
+                            lon : numpy ndarray
+                                array of longitude coordinates
 
-    Returns:
-        bool: True if all values in lat are numeric between -90 and 90 inclusive, and all values in lon are numeric between -180 and 360 inclusive.
-    """
+                        Returns
+                        -------
+                            bool: True if all values in lat are numeric between -90 and 90 inclusive,
+                             and all values in lon are numeric between -180 and 360 inclusive. False otherwise.
+                        """
+
     if not (isinstance(lat, np.ndarray) and isinstance(lon, np.ndarray)):
         raise ValueError("Input lat and lon must be numpy arrays.")
     
@@ -413,9 +445,27 @@ def is_lat_lon(lat, lon):
 
 def vxvy2uv(lat_or_x, lon_or_y, vx, vy):
     """
-    vxvy2uv transforms polar stereographic vector components to
-    georeferenced (zonal and meridional) vector components.
-    """
+                            Transforms polar stereographic coordinates to georeferenced (zonal and meridional) coordinates.
+
+                            Parameters
+                            ----------
+                                lat_or_x : numpy ndarray
+                                    array of latitude or x (polar stereographic) coordinates
+                                lon_or_y : numpy ndarray
+                                    array of longitude or y (polar stereographic) coordinates
+                                vx : numpy ndarray
+                                    magnitudes to multiply lat_or_x values by
+                                vy : numpy ndarray
+                                    magnitudes to multiply lon_or_y values by
+
+                            Returns
+                            -------
+                                u : numpy ndarray
+                                    the zonal component, representing the eastward component of the vector field
+                                v : numpy ndarray
+                                    the meridional component, representing the northward component of the vector field
+                            """
+
     # Input checks
     assert lat_or_x.shape == lon_or_y.shape == vx.shape == vy.shape, "All inputs must be of equal dimensions"
     assert np.issubdtype(lat_or_x.dtype, np.number), "All inputs must be numeric"
