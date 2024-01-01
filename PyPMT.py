@@ -35,17 +35,17 @@ from cartopy.feature import NaturalEarthFeature
 
 def load_csv_data(file_name):
     """
-            Load in a csv file (used in scarloc)
+    Load in a csv file (used in scarloc)
 
-            Parameters
-            ----------
-                file_name : string
-                    path to the file
+    Parameters
+    ----------
+        file_name : string
+            path to the file
 
-            Returns
-            -------
-                numpy.ndarrays for latitude, longitude, and location names
-            """
+    Returns
+    -------
+        numpy.ndarrays for latitude, longitude, and location names
+    """
     lat = []
     lon = []
     names = []
@@ -69,22 +69,22 @@ def load_csv_data(file_name):
 
 def str_lookup(feature_name, names):
     """
-            Search for features by name (used in scarloc)
+    Search for features by name (used in scarloc)
 
-            Parameters
-            ----------
-                feature_name : string
-                    feature we will be searching for
-                names : np.ndarray
-                    names of features (loaded in with load_csv_data)
+    Parameters
+    ----------
+        feature_name : string
+            feature we will be searching for
+        names : np.ndarray
+            names of features (loaded in with load_csv_data)
 
-            Returns
-            -------
-                x : int
-                    integer of the first index of names that matches feature_name
-                nearby_names : list
-                    items from names that match feature_name
-            """
+    Returns
+    -------
+        x : int
+            integer of the first index of names that matches feature_name
+        nearby_names : list
+            items from names that match feature_name
+    """
 
     feature_name = feature_name.lower()  # Convert feature_name to lowercase for case-insensitive matching
 
@@ -102,18 +102,18 @@ def str_lookup(feature_name, names):
 
 def scar_loc(feature_name, *varargin):
     """
-            Find lat/lon coordinates of Antarctic features
+    Find lat/lon coordinates of Antarctic features
 
-            Parameters
-            ----------
-                feature_name : string
-                    name of the desired feature
+    Parameters
+    ----------
+        feature_name : string
+            name of the desired feature
 
-            Returns
-            -------
-                varargout : numpy.ndarray or list
-                    latitude and longitude coordinates
-            """
+    Returns
+    -------
+        varargout : numpy.ndarray or list
+            latitude and longitude coordinates
+    """
 
     # Check if feature_name is a list or a single string
     if isinstance(feature_name, str):
@@ -208,15 +208,15 @@ def scar_loc(feature_name, *varargin):
 
 def handle_missing_feature(feature_name, nearby_names):
     """
-                Prints messages to notify users that feature_name is not in the names array.
+    Prints messages to notify users that feature_name is not in the names array.
 
-                Parameters
-                ----------
-                    feature_name : string
-                        name of the desired feature
-                    nearby_names : list
-                        items from names that match feature_name
-                """
+    Parameters
+    ----------
+        feature_name : string
+            name of the desired feature
+        nearby_names : list
+            items from names that match feature_name
+    """
     fmsg = [
         f'"{feature_name}" not found.',
         f'Are you sure that "{feature_name}" exists in Antarctica?',
@@ -264,22 +264,22 @@ def handle_missing_feature(feature_name, nearby_names):
 
 def ll2ps(lat, lon, **kwargs):
     """
-                Converts latitude/longitude coordinates to polar stereographic coordinates.
+    Converts latitude/longitude coordinates to polar stereographic coordinates.
 
-                Parameters
-                ----------
-                    lat : float, int, list of floats/int, or numpy ndarray of floats/int
-                        latitude coordinate(s)
-                    lon : float, int, list of floats/int, or numpy ndarray of floats/int
-                        longitude coordinate(s)
+    Parameters
+    ----------
+        lat : float, int, list of floats/int, or numpy ndarray of floats/int
+            latitude coordinate(s)
+        lon : float, int, list of floats/int, or numpy ndarray of floats/int
+            longitude coordinate(s)
 
-                Returns
-                -------
-                    x : float
-                        calculated x coordinate(s)
-                    y : float
-                        calculated y coordinate(S)
-                """
+    Returns
+    -------
+        x : float
+            calculated x coordinate(s)
+        y : float
+            calculated y coordinate(S)
+    """
     # Set default values
     phi_c = kwargs.get('TrueLat', -71)
     a = kwargs.get('EarthRadius', 6378137.0)
@@ -312,22 +312,22 @@ def ll2ps(lat, lon, **kwargs):
 
 def ps2ll(x, y, **kwargs):
     """
-                    Converts polar stereographic coordinates to latitude/longitude coordinates.
+    Converts polar stereographic coordinates to latitude/longitude coordinates.
 
-                    Parameters
-                    ----------
-                        x : float
-                            calculated x coordinate(s)
-                        y : float
-                            calculated y coordinate(S)
+    Parameters
+    ----------
+        x : float
+            calculated x coordinate(s)
+        y : float
+            calculated y coordinate(S)
 
-                    Returns
-                    -------
-                        lat : float, int, list of floats/int, or numpy ndarray of floats/int
-                            latitude coordinate(s)
-                        lon : float, or numpy ndarray of floats
-                            longitude coordinate(s)
-                    """
+    Returns
+    -------
+        lat : float, int, list of floats/int, or numpy ndarray of floats/int
+            latitude coordinate(s)
+        lon : float, or numpy ndarray of floats
+            longitude coordinate(s)
+    """
     # Define default values for optional keyword arguments
     phi_c = -71  # standard parallel (degrees)
     a = 6378137.0  # radius of ellipsoid, WGS84 (meters)
@@ -407,20 +407,20 @@ def ps2ll(x, y, **kwargs):
 
 def is_lat_lon(lat, lon):
     """
-                        Determines whether lat, lon is likely to represent geographical coordinates.
+    Determines whether lat, lon is likely to represent geographical coordinates.
 
-                        Parameters
-                        ----------
-                            lat : numpy ndarray
-                                array of latitude coordinates
-                            lon : numpy ndarray
-                                array of longitude coordinates
+    Parameters
+    ----------
+        lat : numpy ndarray
+            array of latitude coordinates
+        lon : numpy ndarray
+            array of longitude coordinates
 
-                        Returns
-                        -------
-                            bool: True if all values in lat are numeric between -90 and 90 inclusive,
-                             and all values in lon are numeric between -180 and 360 inclusive. False otherwise.
-                        """
+    Returns
+    -------
+        bool: True if all values in lat are numeric between -90 and 90 inclusive,
+         and all values in lon are numeric between -180 and 360 inclusive. False otherwise.
+    """
 
     if not (isinstance(lat, np.ndarray) and isinstance(lon, np.ndarray)):
         raise ValueError("Input lat and lon must be numpy arrays.")
@@ -445,26 +445,26 @@ def is_lat_lon(lat, lon):
 
 def vxvy2uv(lat_or_x, lon_or_y, vx, vy):
     """
-                            Transforms polar stereographic coordinates to georeferenced (zonal and meridional) coordinates.
+    Transforms polar stereographic coordinates to georeferenced (zonal and meridional) coordinates.
 
-                            Parameters
-                            ----------
-                                lat_or_x : numpy ndarray
-                                    array of latitude or x (polar stereographic) coordinates
-                                lon_or_y : numpy ndarray
-                                    array of longitude or y (polar stereographic) coordinates
-                                vx : numpy ndarray
-                                    magnitudes to multiply lat_or_x values by
-                                vy : numpy ndarray
-                                    magnitudes to multiply lon_or_y values by
+    Parameters
+    ----------
+        lat_or_x : numpy ndarray
+            array of latitude or x (polar stereographic) coordinates
+        lon_or_y : numpy ndarray
+            array of longitude or y (polar stereographic) coordinates
+        vx : numpy ndarray
+            magnitudes to multiply lat_or_x values by
+        vy : numpy ndarray
+            magnitudes to multiply lon_or_y values by
 
-                            Returns
-                            -------
-                                u : numpy ndarray
-                                    the zonal component, representing the eastward component of the vector field
-                                v : numpy ndarray
-                                    the meridional component, representing the northward component of the vector field
-                            """
+    Returns
+    -------
+        u : numpy ndarray
+            the zonal component, representing the eastward component of the vector field
+        v : numpy ndarray
+            the meridional component, representing the northward component of the vector field
+    """
 
     # Input checks
     assert lat_or_x.shape == lon_or_y.shape == vx.shape == vy.shape, "All inputs must be of equal dimensions"
@@ -487,6 +487,25 @@ def vxvy2uv(lat_or_x, lon_or_y, vx, vy):
 
 
 def quivermc(lat, lon, u, v, **kwargs):
+    """
+    Plots vectors of zonal and meridional components.
+
+    Parameters
+    ----------
+        lat : numpy ndarray
+            array of latitude coordinates
+        lon : numpy ndarray
+            array of longitude coordinates
+        u : numpy ndarray
+            the zonal component, representing the eastward component of the vector field
+        v : numpy ndarray
+            the meridional component, representing the northward component of the vector field
+
+    Returns
+    -------
+        Displays a matplotlib plot.
+    """
+
     # Calculate the magnitude of the vectors
     magnitude = np.sqrt(u ** 2 + v ** 2)
 
@@ -497,17 +516,22 @@ def quivermc(lat, lon, u, v, **kwargs):
 
 def quiverps(lat, lon, u, v, **kwargs):
     """
-    This function creates a quiver plot in polar stereographic coordinates, similar to the quiverps function in MATLAB.
+    Plots vectors of zonal and meridional components.
 
-    Parameters:
-    lat (array-like): The latitudes at which to plot vectors.
-    lon (array-like): The longitudes at which to plot vectors.
-    u (array-like): The zonal components of the vectors.
-    v (array-like): The meridional components of the vectors.
-    **kwargs: Additional keyword arguments to pass to plt.quiver.
+    Parameters
+    ----------
+        lat : numpy ndarray
+            array of latitude coordinates
+        lon : numpy ndarray
+            array of longitude coordinates
+        u : numpy ndarray
+            the zonal component, representing the eastward component of the vector field
+        v : numpy ndarray
+            the meridional component, representing the northward component of the vector field
 
-    Returns:
-    None
+    Returns
+    -------
+        Displays a matplotlib plot.
     """
 
     # Create a figure and axes
@@ -536,8 +560,20 @@ def quiverps(lat, lon, u, v, **kwargs):
 
 
 def thickness_2_freeboard(t, **kwargs):
-    """thickness_2_freeboard estimates freeboard height above sea level, from ice thickness
-    assuming hyrostatic equilibrium. """
+    """
+    Estimates freeboard height above sea level, from ice thickness, assuming hydrostatic equilibrium.
+
+    Parameters
+    ----------
+        t : int or float
+            ice thickness
+
+    Returns
+    -------
+        f : float
+            freeboard height above sea level
+    """
+
     rhoi = kwargs.get('rhoi', 917)
     rhow = kwargs.get('rhow', 1027)
     rhos = kwargs.get('rhos', 350)
@@ -550,8 +586,19 @@ def thickness_2_freeboard(t, **kwargs):
 
 
 def freeboard_2_thickness(f, **kwargs):
-    """freeboard_2_thickness estimates ice thickness from height above sea level,
-    assuming hyrostatic equilibrium. """
+    """
+    Estimates ice thickness from height above sea level, assuming hydrostatic equilibrium.
+
+    Parameters
+    ----------
+        f : int or float
+            height above sea level
+
+    Returns
+    -------
+        t : float
+            ice thickness
+    """
     rhoi = kwargs.get('rhoi', 917)
     rhow = kwargs.get('rhow', 1027)
     rhos = kwargs.get('rhos', 350)
@@ -568,6 +615,19 @@ def base_2_free_board(B, rhoi=917, rhow=1027, rhos=350, ts=0):
     Estimates freeboard height above sea level, from ice basal elevation,
     assuming hydrostatic equilibrium.
 
+    Parameters
+    ----------
+        B : float
+            basal elevation of ice (in meters)
+        rhoi : float
+            Ice density in kg/m^3. Default is 917 kg/m^3.
+        rhow : float
+
+
+    Returns
+    -------
+        t : float
+            ice thickness
     Parameters:
     B (float): Basal elevation of ice in meters.
     rhoi (float): Ice density in kg/m^3. Default is 917 kg/m^3.
