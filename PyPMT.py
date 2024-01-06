@@ -587,12 +587,12 @@ def thickness_2_freeboard(t, **kwargs):
 
 def freeboard_2_thickness(f, **kwargs):
     """
-    Estimates ice thickness from height above sea level, assuming hydrostatic equilibrium.
+    Estimates ice thickness from freeboard height above sea level, assuming hydrostatic equilibrium.
 
     Parameters
     ----------
         f : int or float
-            height above sea level
+            freeboard height above sea level
 
     Returns
     -------
@@ -618,25 +618,21 @@ def base_2_free_board(B, rhoi=917, rhow=1027, rhos=350, ts=0):
     Parameters
     ----------
         B : float
-            basal elevation of ice (in meters)
+            Basal elevation of ice (in meters).
         rhoi : float
             Ice density in kg/m^3. Default is 917 kg/m^3.
         rhow : float
+            Water density in kg/m^3. Default is 1027 kg/m^3.
+        rhos : float
+            Snow density in kg/m^3. Default is 350 kg/m^3.
+        ts : float
+            Snow thickness in meters. Default is 0 m.
 
 
     Returns
     -------
-        t : float
-            ice thickness
-    Parameters:
-    B (float): Basal elevation of ice in meters.
-    rhoi (float): Ice density in kg/m^3. Default is 917 kg/m^3.
-    rhow (float): Water density in kg/m^3. Default is 1027 kg/m^3.
-    rhos (float): Snow density in kg/m^3. Default is 350 kg/m^3.
-    ts (float): Snow thickness in meters. Default is 0 m.
-
-    Returns:
-    float: Freeboard height above sea level in meters.
+        f : float
+            Freeboard height above sea level (in meters).
     """
     f = (B - ts * ((rhow - rhos) / (rhow - rhoi))) / (1 - rhow / (rhow - rhoi))
 
@@ -649,7 +645,39 @@ def base_2_free_board(B, rhoi=917, rhow=1027, rhos=350, ts=0):
 # In[ ]:
 
 
-def contour_ps(lat, lon, z, n=None, v=None, line_spec=None, plot_km=False, meridian=0, ax=None, fill=False):
+def contour_ps(lat, lon, z, n=None, v=None, line_spec=None, plot_km=False, ax=None, fill=False):
+    """
+    Contour function that plots georeferenced data in polar stereographic coordinates.
+
+    Parameters
+    ----------
+        lat : numpy ndarray
+            array of latitude coordinates
+        lon : numpy ndarray
+            array of longitude coordinates
+        z : numpy ndarray
+            array of z coordinates
+        n : float or int or array-like, optional
+            The number of contour levels or an array of contour values. If not specified,
+            a default set of contour levels will be used.
+        v : float or int or array-like, optional
+            Alternatively, you can specify specific contour values using the `v` parameter.
+        line_spec : str, optional
+            Line style for contour lines (e.g., 'dashed', 'solid', 'dotted'). If not specified,
+            default line styles will be used.
+        plot_km : bool, optional
+            If True, convert latitude and longitude coordinates to kilometers.
+        ax : matplotlib.axes._subplots.AxesSubplot, optional
+            Axes on which to plot the contour. If not specified, a new figure and axes will be created.
+        fill : bool, optional
+            If True, create filled contours. If False, create contour lines. Default is False.
+
+
+    Returns
+    -------
+        cs : matplotlib.contour.QuadContourSet
+            A QuadContourSet instance representing the filled or line contours.
+    """
     # Convert lat, lon to polar stereographic coordinates
     x, y = lat, lon
     # print(x)
@@ -692,6 +720,33 @@ def contour_ps(lat, lon, z, n=None, v=None, line_spec=None, plot_km=False, merid
 
 
 def find_2d_range(x, y, xi, yi, extra_indices=(0, 0)):
+    """
+    Returns matrix indices which encompass a range of xi, yi values.
+
+    Parameters
+    ----------
+        x : numpy ndarray
+            array of x coordinates
+        y : numpy ndarray
+            array of y coordinates
+        xi : numpy ndarray
+            array of xi values defining the x-axis range
+        yi : numpy ndarray
+            array of yi values defining the y-axis range
+        extra_indices : tuple, optional
+            Extra indices to expand the result by adding extra rows and columns.
+            It is a tuple of two non-negative integers (extra_rows, extra_cols).
+
+
+
+    Returns
+    -------
+        row_range : numpy ndarray
+            1D array of row indices encompassing the specified yi range.
+        col_range : numpy ndarray
+            1D array of column indices encompassing the specified xi range.
+
+    """
     assert np.issubdtype(x.dtype, np.number), 'X must be numeric.'
     assert x.ndim <= 2, 'This function only works for 1D or 2D X and Y arrays.'
     assert x.shape == y.shape, 'X and Y must be the same exact size.'
