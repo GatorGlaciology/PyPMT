@@ -745,7 +745,6 @@ def find_2d_range(x, y, xi, yi, extra_indices=(0, 0)):
             1D array of row indices encompassing the specified yi range.
         col_range : numpy ndarray
             1D array of column indices encompassing the specified xi range.
-
     """
     assert np.issubdtype(x.dtype, np.number), 'X must be numeric.'
     assert x.ndim <= 2, 'This function only works for 1D or 2D X and Y arrays.'
@@ -783,15 +782,33 @@ def find_2d_range(x, y, xi, yi, extra_indices=(0, 0)):
 # In[ ]:
 
 
-def geoquadps(ax, latlim, lonlim, plot_km=False, **kwargs):
-    assert len(latlim) == 2 and len(lonlim) == 2, "Error: latlim and lonlim must each be two-element arrays."
-    assert all(-90 <= lat <= 90 for lat in latlim) and all(-180 <= lon <= 180 for lon in lonlim), "Error: latlim and lonlim must be geographic coordinates."
+def geoquad_ps(ax, lat_lim, lon_lim, **kwargs):
+    """
+    Plots a geographic quadrangle in polar stereographic units.
 
-    if np.diff(lonlim) < 0:
-        lonlim[1] = lonlim[1] + 360
+    Parameters
+    ----------
+        ax : matplotlib.axes._subplots.AxesSubplot
+            Axes on which to plot the quadrangle.
+        lat_lim : list
+            List containing the bounds of the shape (min and max latitude).
+        lon_lim : list
+            List containing the bounds of the shape (min and max latitude).
 
-    lat = np.concatenate((np.linspace(latlim[0], latlim[0], 200), np.linspace(latlim[1], latlim[1], 200), [latlim[0]]))
-    lon = np.concatenate((np.linspace(lonlim[0], lonlim[1], 200), np.linspace(lonlim[1], lonlim[0], 200), [lonlim[0]]))
+
+    Returns
+    -------
+        ax : matplotlib.axes._subplots.AxesSubplot
+            The input axes, now with the grid as well.
+        """
+    assert len(lat_lim) == 2 and len(lon_lim) == 2, "Error: lat_lim and lon_lim must each be two-element arrays."
+    assert all(-90 <= lat <= 90 for lat in lat_lim) and all(-180 <= lon <= 180 for lon in lon_lim), "Error: lat_lim and lon_lim must be geographic coordinates."
+
+    if np.diff(lon_lim) < 0:
+        lon_lim[1] = lon_lim[1] + 360
+
+    lat = np.concatenate((np.linspace(lat_lim[0], lat_lim[0], 200), np.linspace(lat_lim[1], lat_lim[1], 200), [lat_lim[0]]))
+    lon = np.concatenate((np.linspace(lon_lim[0], lon_lim[1], 200), np.linspace(lon_lim[1], lon_lim[0], 200), [lon_lim[0]]))
 
     vertices = np.column_stack([lon, lat])
     path = mpath.Path(vertices)
@@ -802,6 +819,28 @@ def geoquadps(ax, latlim, lonlim, plot_km=False, **kwargs):
 
 
 def ps_grid(center_x, center_y, width_km, height_km, resolution_km):
+    """
+    Creates a polar stereographic grid of specified spatial resolution.
+
+    Parameters
+    ----------
+        center_x : int or float
+            X coordinate or latitude representing the center of the grid.
+        center_y : int or float
+            Y coordinate or longitude representing the center of the grid.
+        width_km : int or float
+            The width of the grid (in kilometers).
+        height_km : int or float
+            The height of the grid (in kilometers).
+        resolution_km : int or float
+            The desired spatial resolution (in kilometers).
+
+
+    Returns
+    -------
+        ax : matplotlib.axes._subplots.AxesSubplot
+            The input axes, now with the quadrangle.
+        """
     center_x = np.array(center_x)
     center_y = np.array(center_y)
 
@@ -916,14 +955,14 @@ def path_dist(lat, lon, units='m', track='gc', refpoint=None):
     return path_distance
 
 
-def inpsquad(lat, lon, latlim, lonlim, inclusive=False):
+def inpsquad(lat, lon, lat_lim, lon_lim, inclusive=False):
     assert np.array(lat.shape) == np.array(lon.shape), 'Inputs lat and lon must be the same size.'
-    assert np.array(latlim.shape) == np.array(
-        lonlim.shape), 'Inputs latlim_or_xlim and lonlim_or_ylim must be the same size.'
-    assert len(latlim) > 1, 'latlim or xlim must have more than one point.'
+    assert np.array(lat_lim.shape) == np.array(
+        lon_lim.shape), 'Inputs lat_lim_or_xlim and lon_lim_or_ylim must be the same size.'
+    assert len(lat_lim) > 1, 'lat_lim or xlim must have more than one point.'
 
-    min_lat, max_lat = min(latlim), max(latlim)
-    min_lon, max_lon = min(lonlim), max(lonlim)
+    min_lat, max_lat = min(lat_lim), max(lat_lim)
+    min_lon, max_lon = min(lon_lim), max(lon_lim)
 
     IN = np.logical_and(lat >= min_lat, lat <= max_lat)
     IN = np.logical_and(IN, lon >= min_lon)
