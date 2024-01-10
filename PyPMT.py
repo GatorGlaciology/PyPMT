@@ -870,6 +870,29 @@ def ps_grid(center_x, center_y, width_km, height_km, resolution_km):
 
 
 def uv2vxvy(lat_or_x, lon_or_y, u, v):
+    """
+    Transforms georeferenced (zonal and meridional) vectors components
+    to cartesian (polar stereographic) coordinate components.
+
+    Parameters
+    ----------
+        lat_or_x : int or float or list or numpy ndarray
+            Latitude or x-coordinates of the vector field points.
+        lon_or_y : int or float or list or numpy ndarray
+            Y coordinate or longitude representing the center of the grid.
+        u : int or float or list or numpy ndarray
+            Zonal (eastward) component of the vector field.
+        v : int or float or list or numpy ndarray
+            Meridional (northward) component of the vector field.
+
+
+    Returns
+    -------
+        vx : float or numpy ndarray
+            Horizontal component of the vector field in cartesian coordinates.
+        vy : float or numpy ndarray
+            Vertical component of the vector field in cartesian coordinates.
+        """
     # Convert inputs to numpy arrays if they are not already
     lat_or_x = np.array(lat_or_x) if not isinstance(lat_or_x, np.ndarray) else lat_or_x
     lon_or_y = np.array(lon_or_y) if not isinstance(lon_or_y, np.ndarray) else lon_or_y
@@ -900,14 +923,36 @@ def uv2vxvy(lat_or_x, lon_or_y, u, v):
     return vx, vy
 
 
-def path_dist(lat, lon, units='m', track='gc', refpoint=None):
+def path_dist(lat, lon, units='m', ref_point=None):
+    """
+    Calculates cumulative distance traveled along a path given by the arrays lat and lon.
+
+    Parameters
+    ----------
+        lat : list or numpy ndarray
+            Latitude coordinates of the traveled path.
+        lon : list or numpy ndarray
+            Longitude coordinates of the traveled path.
+        units : string
+            Specifies the distance metric to use. Options are meters ('m'),
+            kilometers ('km'), nautical miles ('nm'), feet ('ft'),
+            inches ('in'), yards ('yd'), and miles ('mi').
+        ref_point: int or float or list or numpy ndarray
+            Meridional (northward) component of the vector field.
+
+
+    Returns
+    -------
+        path_distance : float or numpy ndarray
+            Distance(s) traveled along the given path(s).
+        """
     assert len(lat) == len(lon), 'Length of lat and lon must match.'
     assert len(lat) > 1, 'lat and lon must have more than one point.'
 
     # Check if reference point is defined:
-    if refpoint is not None:
+    if ref_point is not None:
         assert len(
-            refpoint) == 2, 'Coordinates of reference point can be only a single point given by a latitude/longitude pair in the form [reflat reflon].'
+            ref_point) == 2, 'Coordinates of reference point can be only a single point given by a latitude/longitude pair in the form [reflat reflon].'
 
     # Convert units to geopy format
     if units in ['m', 'meter(s)', 'metre(s)']:
@@ -938,7 +983,7 @@ def path_dist(lat, lon, units='m', track='gc', refpoint=None):
         distance = geodesic(start_point, end_point).meters
 
         # If this is the reference point, update the reference distance
-        if refpoint is not None and (lat[i - 1], lon[i - 1]) == tuple(refpoint):
+        if ref_point is not None and (lat[i - 1], lon[i - 1]) == tuple(ref_point):
             ref_distance = sum(path_distance)
 
         # If units are not meters, convert distance to specified units
