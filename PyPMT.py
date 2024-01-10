@@ -879,7 +879,7 @@ def uv2vxvy(lat_or_x, lon_or_y, u, v):
         lat_or_x : int or float or list or numpy ndarray
             Latitude or x-coordinates of the vector field points.
         lon_or_y : int or float or list or numpy ndarray
-            Y coordinate or longitude representing the center of the grid.
+            Longitude or Y coordinates representing the center of the grid.
         u : int or float or list or numpy ndarray
             Zonal (eastward) component of the vector field.
         v : int or float or list or numpy ndarray
@@ -1000,7 +1000,27 @@ def path_dist(lat, lon, units='m', ref_point=None):
     return path_distance
 
 
-def inpsquad(lat, lon, lat_lim, lon_lim, inclusive=False):
+def in_ps_quad(lat, lon, lat_lim, lon_lim):
+    """
+    Returns true for points inside a polar stereographic quadrangle.
+
+    Parameters
+    ----------
+        lat : numpy ndarray
+            Latitude coordinate(s) of the desired point(s).
+        lon : numpy ndarray
+            Longitude coordinates of the desired point(s).
+        lat_lim : numpy ndarray
+            Array containing the bounds of the shape (min and max latitude).
+        lon_lim: numpy ndarray
+            List containing the bounds of the shape (min and max longitude).
+
+
+    Returns
+    -------
+        IN : bool
+            Returns True if the point is inside the quadrangle.
+        """
     assert np.array(lat.shape) == np.array(lon.shape), 'Inputs lat and lon must be the same size.'
     assert np.array(lat_lim.shape) == np.array(
         lon_lim.shape), 'Inputs lat_lim_or_xlim and lon_lim_or_ylim must be the same size.'
@@ -1016,7 +1036,24 @@ def inpsquad(lat, lon, lat_lim, lon_lim, inclusive=False):
     return IN
 
 
-def psdistortion(lat, true_lat=-71):
+def ps_distortion(lat, true_lat=-71):
+    """
+    Approximates the map scale factor for a polar stereographic projection.
+    It is the ratio of distance on a ps projection to distance on a sphere.
+
+    Parameters
+    ----------
+        lat : int or float or list or numpy ndarray
+            Latitude(s) at which the map scale factor is calculated.
+        true_lat : int or float, optional
+            Latitude of true scale for the polar stereographic projection.
+            Default is -71 degrees.
+
+    Returns
+    -------
+        m : float
+            The calculated map scale factor.
+        """
     assert np.all(np.abs(lat) <= 90), 'Error: inputs must be latitudes.'
     assert np.isscalar(true_lat), 'Error: true_lat must be a scalar.'
     assert np.abs(true_lat) <= 90, 'Error: true_lat must be in the range -90 to 90.'
@@ -1029,7 +1066,22 @@ def psdistortion(lat, true_lat=-71):
     return m
 
 
-def path_distps(lat_or_x, lon_or_y, *args):
+def path_dist_ps(lat_or_x, lon_or_y, *args):
+    """
+        Returns the cumulative distance along a path in polar stereographic coordinates.
+
+        Parameters
+        ----------
+            lat_or_x : numpy ndarray
+                Latitude or x-coordinates of the traveled path.
+            lon_or_y : numpy ndarray
+                Longitude or y-coordinates of the traveled path.
+
+        Returns
+        -------
+            d : numpy ndarray
+                Distance(s) traveled along the given path(s) in polar stereographic coordinates..
+            """
     # Initialize variables
     lat_or_x = np.array(lat_or_x)
     lon_or_y = np.array(lon_or_y)
@@ -1055,7 +1107,7 @@ def path_distps(lat_or_x, lon_or_y, *args):
         lat, _ = ps2ll(x, y)  # don't need lon
 
     # Perform mathematics:
-    m = psdistortion(lat[1:])  # Assuming psdistortion is defined or imported
+    m = ps_distortion(lat[1:])  # Assuming ps_distortion is defined or imported
 
     # Cumulative sum of distances:
     d = np.zeros_like(x)
@@ -1088,7 +1140,7 @@ def ps_path(lat_or_x, lon_or_y, spacing, method='linear'):
         x = lat_or_x
         y = lon_or_y
 
-    d = path_distps(x, y)
+    d = path_dist_ps(x, y)
 
     # Create interpolation function based on method
     func_x = interp1d(d, x, kind=method, fill_value="extrapolate")
