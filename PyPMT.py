@@ -1068,20 +1068,20 @@ def ps_distortion(lat, true_lat=-71):
 
 def path_dist_ps(lat_or_x, lon_or_y, *args):
     """
-        Returns the cumulative distance along a path in polar stereographic coordinates.
+    Returns the cumulative distance along a path in polar stereographic coordinates.
 
-        Parameters
-        ----------
-            lat_or_x : numpy ndarray
-                Latitude or x-coordinates of the traveled path.
-            lon_or_y : numpy ndarray
-                Longitude or y-coordinates of the traveled path.
+    Parameters
+    ----------
+        lat_or_x : numpy ndarray
+            Latitude or x-coordinates of the traveled path.
+        lon_or_y : numpy ndarray
+            Longitude or y-coordinates of the traveled path.
 
-        Returns
-        -------
-            d : numpy ndarray
-                Distance(s) traveled along the given path(s) in polar stereographic coordinates..
-            """
+    Returns
+    -------
+        d : numpy ndarray
+            Distance(s) traveled along the given path(s) in polar stereographic coordinates..
+        """
     # Initialize variables
     lat_or_x = np.array(lat_or_x)
     lon_or_y = np.array(lon_or_y)
@@ -1129,6 +1129,28 @@ def path_dist_ps(lat_or_x, lon_or_y, *args):
 
 
 def ps_path(lat_or_x, lon_or_y, spacing, method='linear'):
+    """
+    Returns coordinates that create a path with equal spacing in polar
+    stereographic coordinates.
+
+    Parameters
+    ----------
+        lat_or_x : numpy ndarray
+            Latitude or x-coordinates of the input points.
+        lon_or_y : numpy ndarray
+            Longitude or y-coordinates of the input points.
+        spacing : int or float
+            The desired spacing between points along the path (in meters).
+        method : string, optional
+            Specifies the interpolation method for path creation.
+
+    Returns
+    -------
+        out1 : numpy ndarray
+            Latitude(s) or x-coordinate(s) of the points along the path with equal spacing.
+        out2 : numpy ndarray
+            Longitude(s) or y-coordinate(S) of the points along the path with equal spacing.
+        """
     assert isinstance(lat_or_x, np.ndarray) and lat_or_x.ndim == 1, 'Input error: input coordinates must be vectors of matching dimensions.'
     assert lat_or_x.shape == lon_or_y.shape, 'Input error: dimensions of input coordinates must match.'
     assert np.isscalar(spacing), 'Input error: spacing must be a scalar.'
@@ -1162,11 +1184,34 @@ def ps_path(lat_or_x, lon_or_y, spacing, method='linear'):
     return out1, out2
 
 
-def path_crossing_ps71(lat_1, lon1, lat_2, lon2, clip_option=None):
+def path_crossing_ps71(lat_1, lon_1, lat_2, lon_2, clip_option=None):
+    """
+    Returns coordinates that create a path with equal spacing in polar
+    stereographic coordinates.
+
+    Parameters
+    ----------
+        lat_1 : numpy ndarray
+            Latitude or x-coordinates of the input points.
+        lon_1 : numpy ndarray
+            Longitude or y-coordinates of the input points.
+        lat_2 : int or float
+            The desired spacing between points along the path (in meters).
+        lon_2 : string, optional
+            Specifies the interpolation method for path creation.
+        clip_option : string, optional
+
+    Returns
+    -------
+        out1 : numpy ndarray
+            Latitude(s) or x-coordinate(s) of the points along the path with equal spacing.
+        out2 : numpy ndarray
+            Longitude(s) or y-coordinate(S) of the points along the path with equal spacing.
+        """
     assert isinstance(lat_1, list) and all(isinstance(i, float) for i in lat_1), 'Input lat_1 must be a list of floats.'
-    assert len(lat_1) == len(lon1), 'Input lat_1 and lon1 must be the same size.'
+    assert len(lat_1) == len(lon_1), 'Input lat_1 and lon_1 must be the same size.'
     assert isinstance(lat_2, list) and all(isinstance(i, float) for i in lat_2), 'Input lat_2 must be a list of floats.'
-    assert len(lat_2) == len(lon2), 'Input lat_2 and lon2 must be the same size.'
+    assert len(lat_2) == len(lon_2), 'Input lat_2 and lon_2 must be the same size.'
 
     clip_data = True
     if clip_option is not None:
@@ -1175,8 +1220,8 @@ def path_crossing_ps71(lat_1, lon1, lat_2, lon2, clip_option=None):
 
     # Transform to polar stereo coordinates with standard parallel at 71 S
     # Here we assume that ll2ps and ps2ll are already defined functions
-    x1, y1 = ll2ps(lat_1, lon1)
-    x2, y2 = ll2ps(lat_2, lon2)
+    x1, y1 = ll2ps(lat_1, lon_1)
+    x2, y2 = ll2ps(lat_2, lon_2)
 
     # Delete faraway points before performing inter_x function for large data sets
     # This part of code is omitted for brevity and because it is an optimization
