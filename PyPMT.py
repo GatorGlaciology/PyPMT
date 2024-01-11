@@ -1129,6 +1129,28 @@ def path_dist_ps(lat_or_x, lon_or_y, *args):
 
 
 def ps_path(lat_or_x, lon_or_y, spacing, method='linear'):
+   
+    """
+    Interpolates a path in polar stereographic coordinates to generate equally spaced coordinates along the path.
+
+    Parameters
+    ----------
+    lat_or_x : numpy ndarray
+        Latitude or x-coordinates of the input path.
+    lon_or_y : numpy ndarray
+        Longitude or y-coordinates of the input path.
+    spacing : scalar
+        Spacing between the generated coordinates along the path.
+    method : str, optional
+        Interpolation method to be used (default is 'linear').
+
+    Returns
+    -------
+    out1 : numpy ndarray
+        Interpolated x or latitude coordinates along the path.
+    out2 : numpy ndarray
+        Interpolated y or longitude coordinates along the path.
+    """
     assert isinstance(lat_or_x, np.ndarray) and lat_or_x.ndim == 1, 'Input error: input coordinates must be vectors of matching dimensions.'
     assert lat_or_x.shape == lon_or_y.shape, 'Input error: dimensions of input coordinates must match.'
     assert np.isscalar(spacing), 'Input error: spacing must be a scalar.'
@@ -1163,6 +1185,29 @@ def ps_path(lat_or_x, lon_or_y, spacing, method='linear'):
 
 
 def path_crossing_ps71(lat_1, lon1, lat_2, lon2, clip_option=None):
+    """
+    Finds the intersection point(s) of two paths in polar stereographic coordinates with a standard parallel at 71°S.
+
+    Parameters
+    ----------
+    lat_1 : list of floats
+        Latitude coordinates of the first path.
+    lon1 : list of floats
+        Longitude coordinates of the first path.
+    lat_2 : list of floats
+        Latitude coordinates of the second path.
+    lon2 : list of floats
+        Longitude coordinates of the second path.
+    clip_option : str, optional
+        Option to clip outliers during computation ('on' or 'off', default is None).
+
+    Returns
+    -------
+    lati : numpy ndarray
+        Latitude coordinate(s) of the intersection point(s).
+    loni : numpy ndarray
+        Longitude coordinate(s) of the intersection point(s).
+    """
     assert isinstance(lat_1, list) and all(isinstance(i, float) for i in lat_1), 'Input lat_1 must be a list of floats.'
     assert len(lat_1) == len(lon1), 'Input lat_1 and lon1 must be the same size.'
     assert isinstance(lat_2, list) and all(isinstance(i, float) for i in lat_2), 'Input lat_2 must be a list of floats.'
@@ -1223,6 +1268,29 @@ def path_crossing_ps71(lat_1, lon1, lat_2, lon2, clip_option=None):
 
 
 def clip_outliers(x, y, x_compare, std, axis):
+    """
+    Clips outliers from the input coordinates based on the specified axis and standard deviation.
+
+    Parameters
+    ----------
+    x : numpy ndarray
+        x or latitude coordinates to be clipped.
+    y : numpy ndarray
+        y or longitude coordinates to be clipped.
+    x_compare : numpy ndarray
+        Reference x or latitude coordinates for mean comparison.
+    std : float
+        Number of standard deviations for the clipping threshold.
+    axis : str
+        Axis along which outliers will be clipped ('x' or 'y').
+
+    Returns
+    -------
+    x : numpy ndarray
+        Clipped x or latitude coordinates.
+    y : numpy ndarray
+        Clipped y or longitude coordinates.
+    """
     if axis == 'x':
         y = y[np.abs(x - np.mean(x_compare)) < std]
         x = x[np.abs(x - np.mean(x_compare)) < std]
@@ -1233,6 +1301,21 @@ def clip_outliers(x, y, x_compare, std, axis):
 
 
 def inter_x(L1, L2):
+    """
+    Finds the intersection point(s) between two paths represented by coordinates.
+
+    Parameters
+    ----------
+    L1 : list of numpy ndarrays
+        Coordinates of the first path.
+    L2 : list of numpy ndarrays
+        Coordinates of the second path.
+
+    Returns
+    -------
+    intersection : list or None
+        List containing intersection point(s) coordinates [x, y] or None if no intersection.
+    """
     line1 = LineString(np.column_stack(L1))
     line2 = LineString(np.column_stack(L2))
     intersection = line1.intersection(line2)
@@ -1252,6 +1335,14 @@ def inter_x(L1, L2):
 
 
 def ant_bounds():
+    """
+    Creates a polar stereographic map of the Antarctic region with coastlines and ice shelves.
+
+    Returns
+    -------
+    ax : GeoAxesSubplot
+        Matplotlib GeoAxesSubplot object with the Antarctic map.
+    """
     fig, ax = plt.subplots(figsize=(10, 10),
                            subplot_kw={'projection': ccrs.Stereographic(central_longitude=0, central_latitude=-90)})
     ax.set_extent([-180, 180, -90, -60], ccrs.PlateCarree())
@@ -1265,6 +1356,25 @@ def ant_bounds():
 
 
 def plot_ps(ax, lat, lon, km=False, **kwargs):
+    """
+    Plots points in polar stereographic coordinates on a specified GeoAxesSubplot.
+
+    Parameters
+    ----------
+    ax : GeoAxesSubplot
+        Matplotlib GeoAxesSubplot object where the points will be plotted.
+    lat : float or list of floats
+        Latitude coordinate(s) of the point(s) to be plotted.
+    lon : float or list of floats
+        Longitude coordinate(s) of the point(s) to be plotted.
+    km : bool, optional
+        If True, coordinates are assumed to be in kilometers (default is False).
+    
+    Returns
+    -------
+    lines : list
+        List of Line2D objects representing the plotted points.
+    """
     if np.isscalar(lat):
         lat = [lat]
     if np.isscalar(lon):
@@ -1276,6 +1386,25 @@ def plot_ps(ax, lat, lon, km=False, **kwargs):
 
 
 def pcolor_ps(ax, x, y, z, **kwargs):
+    """
+    Creates a pseudocolor plot in polar stereographic coordinates on a specified GeoAxesSubplot.
+
+    Parameters
+    ----------
+    ax : GeoAxesSubplot
+        Matplotlib GeoAxesSubplot object where the pseudocolor plot will be created.
+    x : array-like
+        x or latitude coordinates of the grid.
+    y : array-like
+        y or longitude coordinates of the grid.
+    z : array-like
+        Values for the pseudocolor plot.
+        
+    Returns
+    -------
+    h : QuadMesh
+        Matplotlib QuadMesh object representing the pseudocolor plot.
+    """
     if len([x, y, z]) < 3:
         raise ValueError('The pcolor_ps function requires at least three inputs: x, y, and Z.')
 
