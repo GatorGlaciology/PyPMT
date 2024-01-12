@@ -275,9 +275,9 @@ def ll2ps(lat, lon, **kwargs):
 
     Returns
     -------
-        x : float
+        x : float or list of floats
             calculated x coordinate(s)
-        y : float
+        y : float or list of floats
             calculated y coordinate(S)
     """
     # Set default values
@@ -1228,9 +1228,7 @@ def path_crossing_ps71(lat_1, lon1, lat_2, lon2, clip_option=None):
     if clip_data:
         if len(x1) * len(x2) > 1e6:
             for _ in range(2):
-                stdx1 = np.std(np.diff(x1))
                 stdy1 = np.std(np.diff(y1))
-                stdx2 = np.std(np.diff(x2))
                 stdy2 = np.std(np.diff(y2))
                 x1, y1 = clip_outliers(x1, y1, x2, stdy1, 'x')
                 x2, y2 = clip_outliers(x2, y2, x1, stdy2, 'x')
@@ -1273,15 +1271,15 @@ def clip_outliers(x, y, x_compare, std, axis):
 
     Parameters
     ----------
-    x : numpy ndarray
-        x or latitude coordinates to be clipped.
-    y : numpy ndarray
-        y or longitude coordinates to be clipped.
-    x_compare : numpy ndarray
-        Reference x or latitude coordinates for mean comparison.
-    std : float
+    x : float or list of floats
+        x coordinate(s) to be clipped.
+    y : float or list of floats
+        y coordinate(s) to be clipped.
+    x_compare : float or list of floats
+        Reference x or latitude coordinate(s) for mean comparison.
+    std : float or int
         Number of standard deviations for the clipping threshold.
-    axis : str
+    axis : string
         Axis along which outliers will be clipped ('x' or 'y').
 
     Returns
