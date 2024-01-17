@@ -1420,8 +1420,29 @@ def pcolor_ps(ax, x, y, z, **kwargs):
     return h
 
 
-def plot_3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
-    # going to make a function to load bedmachine data, will solve unresolved references
+def plot_3ps(lat, lon, z, x, y, extra_m=50e3, **kwargs):
+    """
+    Creates and displays three-dimensional plots in polar stereographic coordinates.
+
+    Parameters
+    ----------
+    lat : int or float or list or tuple or numpy ndarray
+        Latitude coordinate(s) representing the geographic center of the data.
+    lon : int or float or list or tuple or numpy ndarray
+        Longitude coordinate(s) representing the geographic center of the data.
+    z : numpy ndarray
+        z coordinates to plot.
+    x : numpy ndarray
+        x coordinates to plot.
+    y : numpy ndarray
+        y coordinates to plot.
+    extra_m :
+        The maximum distance (meters) between the plotted x and y coordinates and the
+        input latitude / longitude coordinates.
+    Returns
+    -------
+    None
+    """
 
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
@@ -1436,11 +1457,7 @@ def plot_3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
     maskx = np.abs(x - psx) < extra_m
     masky = np.abs(y - psy) < extra_m
 
-    maskxx, maskyy = np.meshgrid(maskx, masky)
-
     mask2d = np.outer(maskx, masky)
-
-    z_mask = z[mask2d]
 
     x_msk = x[maskx]
     y_msk = y[masky]
@@ -1456,6 +1473,26 @@ def plot_3ps(lat, lon, z, x, y, extra_m=50e3, meridian=0, **kwargs):
 
 
 def circle_ps(ax, lons, lats, radii, km=False, **kwargs):
+    """
+        Plots circles (in polar stereographic coordinates) of given radii on a given plot.
+
+        Parameters
+        ----------
+        ax : GeoAxesSubplot
+            Matplotlib GeoAxesSubplot object where the points will be plotted.
+        lons : int or float or list or numpy ndarray
+            Longitude coordinate(s) for the center of circle(s).
+        lats : int or float or list or numpy ndarray
+            Latitude coordinate(s) for the center of circle(s).
+        radii : int or float or list or numpy ndarray
+            Radius or radii for circle(s). Default is in meters.
+        km : bool
+            True when radii are measured in kilometers, False (default) when
+            radii are measured in meters.
+        Returns
+        -------
+        None
+        """
     geodetic = ccrs.Geodetic(globe=ccrs.Globe(datum='WGS84'))
 
     if km:
@@ -1756,14 +1793,3 @@ def graticule_ps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwar
         map_was_open = False
 
     plot_ps(ax, lat, lon, color='gray')
-
-
-def plot_ps(ax, lat, lon, km=False, **kwargs):
-    if np.isscalar(lat):
-        lat = [lat]
-    if np.isscalar(lon):
-        lon = [lon]
-    x, y = ll2ps(lat, lon)
-    if km:
-        x, y = x / 1000, y / 1000
-    return ax.plot(x, y, **kwargs)
