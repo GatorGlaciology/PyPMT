@@ -1514,6 +1514,20 @@ def circle_ps(ax, lons, lats, radii, km=False, **kwargs):
 
 
 def patch_ps(m, lat, lon, ax=None, color='b', **kwargs):
+    """
+
+
+    Parameters
+    ----------
+    m :
+    lat :
+    lon :
+    ax :
+    color :
+    Returns
+    -------
+
+    """
     # Set default values
     plot_km = kwargs.get('plot_km', False)
     meridian = kwargs.get('meridian', 0)
@@ -1535,7 +1549,22 @@ def patch_ps(m, lat, lon, ax=None, color='b', **kwargs):
     return poly
 
 
-def scar_label(ax, feature_name, plot_km=False, *args, **kwargs):
+def scar_label(ax, feature_name, *args, **kwargs):
+    """
+    Labels Antarctic features on a map. Feature names and locations correspond to
+    25,601 locations identified by the Scientific Committee on Antarctic Research (SCAR).
+
+    Parameters
+    ----------
+    ax : GeoAxesSubplot
+        Matplotlib GeoAxesSubplot object where the features will be labeled.
+    feature_name : string or list of strings
+        Name(s) of the feature(s) to be labeled.
+    Returns
+    -------
+    ax : GeoAxesSubplot
+        Returns the Matplotlib GeoAxesSubplot with the features labeled.
+    """
     # Check if at least one input is provided
     assert len(feature_name) > 0, "The scar_label requires at least one input. What are you trying to label?"
 
@@ -1577,10 +1606,6 @@ def scar_label(ax, feature_name, plot_km=False, *args, **kwargs):
             lat, lon = scar_loc(name)
             feature_lat.append(lat)
             feature_lon.append(lon)
-
-    if plot_km:
-        feature_lon = [lo / 1000 for lo in feature_lon]
-        feature_lat = [la / 1000 for la in feature_lat]
 
     # Place text label
     for i in range(len(feature_name)):
@@ -1652,7 +1677,27 @@ def ps2wkt(lati_or_xi, loni_or_yi, filename=None):
         return np.array(lati), np.array(loni)
 
 
-def scatter_ps(ax, lat, lon, s=100, c='b', km=False, **kwargs):
+def scatter_ps(ax, lat, lon, s=100, c='b', **kwargs):
+    """
+    Plots georeferenced data in polar stereographic coordinates.
+
+    Parameters
+    ----------
+    ax : GeoAxesSubplot
+        Matplotlib GeoAxesSubplot object where the data will be plotted.
+    lat : int or float or list of int or list of float
+        Latitude coordinate(s) of the data.
+    lon : int or float or list of int or list of float
+        Longitude coordinate(s) of the data.
+    s : int or float
+        Size of the data points.
+    c : string
+        Color of the plotted data points.
+    Returns
+    -------
+    ax : GeoAxesSubplot
+        Returns the Matplotlib GeoAxesSubplot with the data points plotted.
+    """
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
@@ -1662,16 +1707,35 @@ def scatter_ps(ax, lat, lon, s=100, c='b', km=False, **kwargs):
     assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "scatter_ps requires numeric inputs first."
     assert np.max(np.abs(lat)) <= 90, "I suspect you have entered silly data into plot_ps because some of your latitudes have absolute values exceeding 90 degrees."
 
-    # If 'km' is present in kwargs, convert coordinates from meters to kilometers
-    if km:
-        lat = [li / 1000 for li in lat]
-        lon = [lo / 1000 for lo in lon]
-
     # Plot the points on the map
     ax.scatter(lon, lat, s=s, c=c, transform=ccrs.PlateCarree(), **kwargs)
 
 
-def surf_ps(lat, lon, x, y, z, plot_km=False, meridian=0, extra_dist=50e3, **kwargs):
+def surf_ps(lat, lon, x, y, z, plot_km=False, extra_dist=50e3, **kwargs):
+    """
+    Creates and displays three-dimensional plots in polar stereographic coordinates.
+
+    Parameters
+    ----------
+    lat : int or float or list or tuple or numpy ndarray
+        Latitude coordinate(s) representing the geographic center of the data.
+    lon : int or float or list or tuple or numpy ndarray
+        Longitude coordinate(s) representing the geographic center of the data.
+    z : numpy ndarray
+        z coordinates to plot.
+    x : numpy ndarray
+        x coordinates to plot.
+    y : numpy ndarray
+        y coordinates to plot.
+    plot_km : bool
+        True if data is plotted in kilometers, False (default) to plot in meters.
+    extra_dist : int or float
+        The maximum distance (meters) between the plotted x and y coordinates and the
+        input latitude / longitude coordinates.
+    Returns
+    -------
+    None
+    """
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
@@ -1734,6 +1798,7 @@ def surf_ps(lat, lon, x, y, z, plot_km=False, meridian=0, extra_dist=50e3, **kwa
 
 
 def greenland_bounds():
+
     fig = plt.figure(figsize=(10, 10))
     map_proj = ccrs.Orthographic(central_longitude=-45.0, central_latitude=70.0)
     ax = fig.add_subplot(1, 1, 1, projection=map_proj)
