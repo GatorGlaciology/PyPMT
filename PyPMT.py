@@ -1798,7 +1798,14 @@ def surf_ps(lat, lon, x, y, z, plot_km=False, extra_dist=50e3, **kwargs):
 
 
 def greenland_bounds():
+    """
+    Creates a polar stereographic map of the Greenland region with coastlines.
 
+    Returns
+    -------
+    ax : Matplotlib GeoAxesSubplot
+        Matplotlib GeoAxesSubplot object with the Antarctic map.
+    """
     fig = plt.figure(figsize=(10, 10))
     map_proj = ccrs.Orthographic(central_longitude=-45.0, central_latitude=70.0)
     ax = fig.add_subplot(1, 1, 1, projection=map_proj)
@@ -1808,7 +1815,25 @@ def greenland_bounds():
     return ax
 
 
-def graticule_ps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwargs):
+def graticule_ps(lats=None, lons=None, clipping=False, ax=None, **kwargs):
+    """
+        Places a graticule on a polar stereographic cartesian coordinate map.
+
+        Parameters
+        ----------
+        lats : list, optional
+            Specifies lines of latitude.
+        lons : list, optional
+            Specifies lines of longitude.
+        clipping : bool, optional
+            True deletes all graticule points outside the extent of the current plot.
+        ax : GeoAxesSubplot, optional
+            GeoAxesSubplot to place the graticule on.
+        Returns
+        -------
+        None
+        """
+
     if lats is None:
         lats = [-85] + list(range(-80, -20, 10))
     if lons is None:
@@ -1842,7 +1867,6 @@ def graticule_ps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwar
 
     # Check if a map was already open
     if ax_limits != [0, 1, 0, 1]:
-        map_was_open = True
         # If user requests polar stereographic kilometers, we have to convert current axis limits to km for comparison:
         if 'km' in kwargs:
             ax_limits = ax_limits * 1000
@@ -1854,7 +1878,5 @@ def graticule_ps(lats=None, lons=None, clipping=False, km=False, ax=None, **kwar
             # Set everything outside current axis limits to NaN
             lat[~np.isin(np.arange(len(lat)), ind)] = np.nan
             lon[~np.isin(np.arange(len(lon)), ind)] = np.nan
-    else:
-        map_was_open = False
 
     plot_ps(ax, lat, lon, color='gray')
