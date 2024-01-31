@@ -1513,21 +1513,29 @@ def circle_ps(ax, lons, lats, radii, km=False, **kwargs):
         ax.plot(circle_points[:, 0], circle_points[:, 1], transform=geodetic, **kwargs)
 
 
-def patch_ps(m, lat, lon, ax=None, color='b', **kwargs):
+def patch_ps(m, lat, lon, ax, color='b', **kwargs):
+    
+    """
+    Description:
+    ------------
+    Plot a polygon patch on a given map using Matplotlib's GeoAxesSubplot.
+
+    Parameters:
+    -----------
+    m : basemap object
+        Matplotlib basemap object representing the map.
+    lat : array-like latitude coordinates of the polygon vertices.
+    lon : array-like longitude coordinates of the polygon vertices.
+    ax : GeoAxesSubplot GeoAxesSubplot object where the patch will be added. 
+    color : str, optional
+        Color of the polygon patch. Default is 'b' (blue).
+
+    Returns:
+    --------
+    poly : Matplotlib Polygon object representing the created patch.
+
     """
 
-
-    Parameters
-    ----------
-    m :
-    lat :
-    lon :
-    ax :
-    color :
-    Returns
-    -------
-
-    """
     # Set default values
     plot_km = kwargs.get('plot_km', False)
     meridian = kwargs.get('meridian', 0)
