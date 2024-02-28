@@ -5,22 +5,14 @@
 
 import numpy as np
 from random import choice, seed
-import math
-from math import isnan
 import csv
-import pyproj
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.colors as mcolors
 from geopy.distance import geodesic
-from pyproj import CRS, Transformer
-from scipy.spatial.distance import pdist, squareform
+from pyproj import Transformer
 from scipy.interpolate import interp1d
 from shapely import MultiPoint
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 from shapely.ops import shared_paths
-import mpl_toolkits
-from mpl_toolkits.basemap import Basemap
 from matplotlib.patches import Polygon, Circle
 import matplotlib.patches as mpatches
 import matplotlib.path as mpath
