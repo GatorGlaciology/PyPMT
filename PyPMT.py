@@ -602,7 +602,7 @@ def freeboard_2_thickness(f, **kwargs):
 # In[ ]:
 
 
-def base_2_free_board(B, rhoi=917, rhow=1027, rhos=350, ts=0):
+def base_2_freeboard(B, rhoi=917, rhow=1027, rhos=350, ts=0):
     """
     Estimates freeboard height above sea level, from ice basal elevation,
     assuming hydrostatic equilibrium.
