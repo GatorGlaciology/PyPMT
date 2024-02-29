@@ -339,7 +339,7 @@ def ps2ll(x, y, **kwargs):
         elif key.lower() == 'earth_radius':
             a = value
             assert isinstance(a, (int, float)), 'Earth radius must be a scalar.'
-            assert a > 7e+3, 'Earth radius should be something like 6378137 in meters.'
+            assert a > 7e+3, 'Earth radius should be something like 6378137 in kilometers.'
         elif key.lower() == 'eccentricity':
             e = value
             assert isinstance(e, (int, float)), 'Earth eccentricity must be a scalar.'
