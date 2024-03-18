@@ -989,7 +989,7 @@ def path_dist(lat, lon, units='m', ref_point=None):
 
         # Add the distance to the previous cumulative distance
         path_distance.append(path_distance[-1] + distance - ref_distance)
-    return path_distance[1:]
+    return path_distance
 
 
 def in_ps_quad(lat, lon, lat_lim, lon_lim):
