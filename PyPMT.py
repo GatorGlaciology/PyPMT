@@ -478,7 +478,7 @@ def vxvy2uv(lat_or_x, lon_or_y, vx, vy):
 # In[ ]:
 
 
-def quivermc(lat, lon, u, v, **kwargs):
+def quiver_mc(lat, lon, u, v, **kwargs):
     """
     Plots vectors of zonal and meridional components.
 
@@ -506,7 +506,7 @@ def quivermc(lat, lon, u, v, **kwargs):
     plt.show()
 
 
-def quiverps(lat, lon, u, v, **kwargs):
+def quiver_ps(lat, lon, u, v, **kwargs):
     """
     Plots vectors of zonal and meridional components.
 
