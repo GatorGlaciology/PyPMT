@@ -1880,3 +1880,17 @@ def graticule_ps(lats=None, lons=None, clipping=False, ax=None, **kwargs):
             lon[~np.isin(np.arange(len(lon)), ind)] = np.nan
 
     plot_ps(ax, lat, lon, color='gray')
+
+
+def text_ps(lat, lon, string, plot_km=False, **kwargs):
+    # Convert lat, lon to polar stereographic coordinates
+    x, y = ll2ps(lat, lon)
+
+    # Convert to kilometers if the user requests it
+    if plot_km:
+        x /= 1000
+        y /= 1000
+
+    # Add the text label at the specified coordinates
+    h = plt.text(x, y, string, horizontalalignment='center', **kwargs)
+    return h
