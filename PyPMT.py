@@ -1341,7 +1341,7 @@ def ant_bounds():
 
     # Add ice shelves as a NaturalEarthFeature
     ice_shelves = NaturalEarthFeature(category='physical', name='antarctic_ice_shelves_polys', scale='10m')
-    ax.add_feature(ice_shelves, facecolor='none', edgecolor='black', linewidth=1.0)
+    ax.add_feature(ice_shelves, facecolor='lightblue', edgecolor='black', linewidth=1.0, zorder=1)
 
     return ax
 
