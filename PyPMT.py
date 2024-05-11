@@ -12,7 +12,6 @@ from pyproj import Transformer
 from scipy.interpolate import interp1d
 from shapely import MultiPoint
 from shapely.geometry import LineString
-from shapely.ops import shared_paths
 from matplotlib.patches import Polygon, Circle
 import matplotlib.patches as mpatches
 import matplotlib.path as mpath
@@ -1175,86 +1174,89 @@ def ps_path(lat_or_x, lon_or_y, spacing, method='linear'):
     return out1, out2
 
 
-def path_crossing_ps71(lat_1, lon1, lat_2, lon2, clip_option=None):
+def path_crossing_ps71(lat_1, lon_1, lat_2, lon_2, clip_option=None):
     """
-    Finds the intersection point(s) of two paths in polar stereographic coordinates with a standard parallel at 71°S.
+        Finds the intersection point(s) of two paths in polar stereographic coordinates with a standard parallel at 71°S.
 
-    Parameters
-    ----------
-    lat_1 : list of floats
-        Latitude coordinates of the first path.
-    lon1 : list of floats
-        Longitude coordinates of the first path.
-    lat_2 : list of floats
-        Latitude coordinates of the second path.
-    lon2 : list of floats
-        Longitude coordinates of the second path.
-    clip_option : str, optional
-        Option to clip outliers during computation ('on' or 'off', default is None).
+        Parameters
+        ----------
+        lat_1 : list of floats
+            Latitude coordinates of the first path.
+        lon_1 : list of floats
+            Longitude coordinates of the first path.
+        lat_2 : list of floats
+            Latitude coordinates of the second path.
+        lon_2 : list of floats
+            Longitude coordinates of the second path.
+        clip_option : str, optional
+            Option to clip outliers during computation ('on' or 'off', default is None).
 
-    Returns
-    -------
-    lati : numpy ndarray
-        Latitude coordinate(s) of the intersection point(s).
-    loni : numpy ndarray
-        Longitude coordinate(s) of the intersection point(s).
-    """
+        Returns
+        -------
+        lat_i : numpy ndarray
+            Latitude coordinate(s) of the intersection point(s).
+        lon_i : numpy ndarray
+            Longitude coordinate(s) of the intersection point(s).
+        """
 
-    assert isinstance(lat_1, list) and all(isinstance(i, float) for i in lat_1), 'Input lat_1 must be a list of floats.'
-    assert len(lat_1) == len(lon1), 'Input lat_1 and lon1 must be the same size.'
-    assert isinstance(lat_2, list) and all(isinstance(i, float) for i in lat_2), 'Input lat_2 must be a list of floats.'
-    assert len(lat_2) == len(lon2), 'Input lat_2 and lon2 must be the same size.'
+    assert isinstance(lat_1, list) and all(isinstance(i, float) for i in lat_1), 'Input lat1 must be a list of floats.'
+    assert len(lat_1) == len(lon_1), 'Input lat1 and lon1 must be the same size.'
+    assert isinstance(lat_2, list) and all(isinstance(i, float) for i in lat_2), 'Input lat2 must be a list of floats.'
+    assert len(lat_2) == len(lon_2), 'Input lat2 and lon2 must be the same size.'
 
     clip_data = True
+
     if clip_option is not None:
         if clip_option.lower().startswith('no') or clip_option.lower() == 'off':
             clip_data = False
 
     # Transform to polar stereo coordinates with standard parallel at 71 S
     # Here we assume that ll2ps and ps2ll are already defined functions
-    x1, y1 = ll2ps(lat_1, lon1)
-    x2, y2 = ll2ps(lat_2, lon2)
+    x1, y1 = ll2ps(lat_1, lon_1)
+    x2, y2 = ll2ps(lat_2, lon_2)
 
-    # Delete faraway points before performing inter_x function for large data sets
+    # Delete faraway points before performing InterX function for large data sets
     # This part of code is omitted for brevity and because it is an optimization
     if clip_data:
         if len(x1) * len(x2) > 1e6:
             for _ in range(2):
+                stdx1 = np.std(np.diff(x1))
                 stdy1 = np.std(np.diff(y1))
+                stdx2 = np.std(np.diff(x2))
                 stdy2 = np.std(np.diff(y2))
+
                 x1, y1 = clip_outliers(x1, y1, x2, stdy1, 'x')
                 x2, y2 = clip_outliers(x2, y2, x1, stdy2, 'x')
                 x1, y1 = clip_outliers(x1, y1, y2, stdy1, 'y')
                 x2, y2 = clip_outliers(x2, y2, y1, stdy2, 'y')
 
     # Find intersection x,y point(s)
-    # Here we assume that inter_x is already defined function
-    P = inter_x([x1, y1], [x2, y2])
+    line1 = LineString(np.column_stack([x1, y1]))
+    line2 = LineString(np.column_stack([x2, y2]))
+    intersection = line1.intersection(line2)
 
-    # If inter_x returns None, try using shared_paths
-    if P is None:
-        line1 = LineString(np.column_stack([x1, y1]))
-        line2 = LineString(np.column_stack([x2, y2]))
-        shared = shared_paths(line1, line2)
-        if not shared.is_empty:
-            # Access the shared paths via the 'geoms' attribute
-            forward, reverse = shared.geoms
-            if not forward.is_empty:
-                # Extract the coordinates of each sub-geometry in 'forward'
-                coords = []
-                for geom in forward.geoms:
-                    coords.extend(geom.coords)
-                x, y = np.array(coords).T
-                P = [x, y]
+    if not intersection.is_empty:
+        if intersection.geom_type == 'MultiPoint':
+            # Extract coordinates from MultiPoint
+            x, y = intersection.xy
+            intersections = np.column_stack((x, y))
+        elif intersection.geom_type == 'Point':
+            # Single intersection point
+            intersections = np.array([intersection.xy])
+        elif intersection.geom_type == 'LineString':
+            # Single LineString intersection
+            intersections = np.array([intersection.coords])
+        else:
+            # Handle other intersection geometries (e.g., MultiLineString)
+            intersections = [np.array(line.coords) for line in intersection.geoms if line.geom_type == 'LineString']
+            intersections = np.concatenate(intersections)
 
-    # If P is still None after trying shared_paths, return None
-    if P is None:
-        return None
+        # Transform back to lat/lon space
+        lat_i, lon_i = ps2ll(intersections[:, 0], intersections[:, 1])
+        return lat_i, lon_i
 
-    # Transform back to lat/lon space
-    lati, loni = ps2ll(np.array(P[0]), np.array(P[1]))
-
-    return lati, loni
+    # If no intersections are found, return None
+    return None
 
 
 def clip_outliers(x, y, x_compare, std, axis):
