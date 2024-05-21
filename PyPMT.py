@@ -255,7 +255,7 @@ def handle_missing_feature(feature_name, nearby_names):
 
 def ll2ps(lat, lon, **kwargs):
     """
-    Converts latitude/longitude coordinates to polar stereographic coordinates.
+    Converts latitude/longitude coordinates to map coordinates for a polar stereographic system.
 
     Parameters
     ----------
