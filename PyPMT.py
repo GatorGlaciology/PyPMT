@@ -1507,48 +1507,52 @@ def circle_ps(ax, lons, lats, radii, km=False, **kwargs):
         ax.plot(circle_points[:, 0], circle_points[:, 1], transform=geodetic, **kwargs)
 
 
-def patch_ps(m, lat, lon, ax, color='b', **kwargs):
-    
+def patch_ps(ax, lat, lon, *args, **kwargs):
     """
-    Description:
-    ------------
-    Plot a polygon patch on a given map using Matplotlib's GeoAxesSubplot.
+        Description:
+        ------------
+        Plot a polygon patch on a given map using Matplotlib's GeoAxesSubplot.
 
-    Parameters:
-    -----------
-    m : basemap object
-        Matplotlib basemap object representing the map.
-    lat : array-like latitude coordinates of the polygon vertices.
-    lon : array-like longitude coordinates of the polygon vertices.
-    ax : GeoAxesSubplot GeoAxesSubplot object where the patch will be added. 
-    color : str, optional
-        Color of the polygon patch. Default is 'b' (blue).
+        Parameters:
+        -----------
+        ax : GeoAxesSubplot GeoAxesSubplot object where the patch will be added.
+        lat : array-like latitude coordinates of the polygon vertices.
+        lon : array-like longitude coordinates of the polygon vertices.
 
-    Returns:
-    --------
-    poly : Matplotlib Polygon object representing the created patch.
+        Returns:
+        --------
+        ax : GeoAxesSubplot GeoAxesSubplot object with the added patch.
 
-    """
+        """
+    # Input checks
+    assert len(lat) > 1 and len(lon) > 1, 'The patchps function requires at least two input: lat and lon.'
+    assert isinstance(lat, (list, np.ndarray)) and isinstance(lon, (list, np.ndarray)), 'patchps requires numeric inputs first.'
+    assert np.abs(lat).max() <= 90, 'Some of your latitudes have absolute values exceeding 90 degrees.'
 
-    # Set default values
-    plot_km = kwargs.get('plot_km', False)
-    meridian = kwargs.get('meridian', 0)
+    # Parse inputs
+    plotkm = False  # By default, plot in meters
+    meridian = 0    # Top of the map is Fimbul Ice Shelf
 
-    # Convert units and plot:
-    x, y = m(lon, lat)
+    if 'km' in kwargs:
+        plotkm = kwargs['km']
+        del kwargs['km']
 
-    # Convert to kilometers if requested:
-    if plot_km:
-        x = x / 1000
-        y = y / 1000
+    if 'meridian' in kwargs:
+        meridian = kwargs['meridian']
+        del kwargs['meridian']
+        assert np.isscalar(meridian), 'Error: meridian must be a scalar longitude.'
 
-    # Create a patch object
-    poly = Polygon(np.column_stack((x, y)), closed=True, fill=True, edgecolor=color, **kwargs)
+    # Convert units and plot
+    x, y = ll2ps(lat, lon, meridian=meridian)
 
-    if ax is not None:
-        ax.add_patch(poly)
+    # Convert to kilometers if user requested
+    if plotkm:
+        x /= 1000
+        y /= 1000
 
-    return poly
+    h = ax.fill(x, y, *args, **kwargs)
+
+    return h
 
 
 def scar_label(ax, feature_name, *args, **kwargs):
