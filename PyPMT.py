@@ -1414,55 +1414,121 @@ def pcolor_ps(ax, x, y, z, **kwargs):
     return h
 
 
-def plot_3ps(lat, lon, z, x, y, extra_m=50e3, **kwargs):
+def plot_3ps(lat, lon, z, x, y, extra_m=50e3, z_scale=1.0, show_grid=True, **kwargs):
     """
-    Creates and displays three-dimensional plots in polar stereographic coordinates.
+        Creates and displays three-dimensional plots in polar stereographic coordinates.
 
-    Parameters
-    ----------
-    lat : int or float or list or tuple or numpy ndarray
-        Latitude coordinate(s) representing the geographic center of the data.
-    lon : int or float or list or tuple or numpy ndarray
-        Longitude coordinate(s) representing the geographic center of the data.
-    z : numpy ndarray
-        z coordinates to plot.
-    x : numpy ndarray
-        x coordinates to plot.
-    y : numpy ndarray
-        y coordinates to plot.
-    extra_m :
-        The maximum distance (meters) between the plotted x and y coordinates and the
-        input latitude / longitude coordinates.
-    Returns
-    -------
-    None
-    """
-
+        Parameters
+        ----------
+        lat : int or float or list or tuple or numpy ndarray
+            Latitude coordinate(s) representing the geographic center of the data.
+        lon : int or float or list or tuple or numpy ndarray
+            Longitude coordinate(s) representing the geographic center of the data.
+        z : numpy ndarray
+            z coordinates to plot.
+        x : numpy ndarray
+            x coordinates to plot.
+        y : numpy ndarray
+            y coordinates to plot.
+        extra_m :
+            The maximum distance (meters) between the plotted x and y coordinates and the
+            input latitude / longitude coordinates.
+        z_scale : int or float
+            The scaling factor to use for the z values.
+        show_grid : boolean
+            Default is True to plot on a grid. False turns off the grid.
+        Returns
+        -------
+        None
+        """
+    # Check if lat and lon are single values or lists/arrays
     if not isinstance(lat, (list, tuple, np.ndarray)):
         lat = [lat]
         lon = [lon]
     else:
         assert len(lat) == len(lon), "The number of latitude and longitude values should be the same."
-    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plot_ps requires numeric inputs first."
-    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plot_ps requires numeric inputs first."
+    assert isinstance(lat, (int, float, list, tuple, np.ndarray)), "plot_3ps requires numeric inputs first."
+    assert isinstance(lon, (int, float, list, tuple, np.ndarray)), "plot_3ps requires numeric inputs first."
 
-    psx, psy = ll2ps(lat, lon, **kwargs)
+    psx, psy = ll2ps(lat, lon, **kwargs)  # Assume ll2ps function is available
 
+    # Create masks to limit the plot area
     maskx = np.abs(x - psx) < extra_m
     masky = np.abs(y - psy) < extra_m
 
+    # Create a 2D mask from the x and y masks
     mask2d = np.outer(maskx, masky)
 
+    # Apply the 2D mask to the z values
+    z_mask = z[mask2d]
+
+    # Create masked x and y arrays
     x_msk = x[maskx]
     y_msk = y[masky]
 
+    # Create a meshgrid from the masked x and y arrays
     xx_msk, yy_msk = np.meshgrid(x_msk, y_msk)
+    z_masked = z_mask.reshape((x_msk.shape[0], y_msk.shape[0]))
 
-    z_masked = z[mask2d].reshape((x_msk.shape[0], y_msk.shape[0]))
+    # Create a new figure and 3D subplot
+    fig = plt.figure(figsize=(10, 10))
+    ax = fig.add_subplot(111, projection='3d')
 
-    fig, ax = plt.subplots(1, 1, figsize=(10, 10), subplot_kw=dict(projection='3d'))
+    cmap = kwargs.get('cmap')
 
-    ax.plot_surface(xx_msk, yy_msk, z_masked, **kwargs)
+    if cmap is not None:
+        # Plot the 3D surface with scaled z-values for visual effect
+        surf = ax.plot_surface(xx_msk, yy_msk, z_masked * z_scale, **kwargs)
+
+        # Set z-axis limits based on the true (unscaled) z values
+        z_min, z_max = np.min(z_masked), np.max(z_masked)
+        ax.set_zlim(z_min, z_max)
+
+        # Create custom z-ticks to show true values
+        num_ticks = 5  # You can adjust this number as needed
+        z_ticks = np.linspace(z_min, z_max, num_ticks)
+        ax.set_zticks(z_ticks * z_scale)
+        ax.set_zticklabels([f'{z:.0f}' for z in z_ticks])
+
+        # Add a colorbar
+        cbar = fig.colorbar(surf, ax=ax, shrink=0.6, aspect=20)
+        cbar.set_label('True Z Value')
+
+        # Set labels
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z (True Scale)')
+
+        # Control grid visibility
+        ax.grid(show_grid)
+
+        # Add a text annotation explaining the visual scaling
+        ax.text2D(0.05, 0.95, f'Visual Z-Scale: {z_scale}', transform=ax.transAxes)
+    else:
+        # Plot the 3D surface with scaled z-values for visual effect
+        surf = ax.plot_surface(xx_msk, yy_msk, z_masked * z_scale, **kwargs)
+
+        # Set z-axis limits based on the true (unscaled) z values
+        z_min, z_max = np.min(z_masked), np.max(z_masked)
+        ax.set_zlim(z_min, z_max)
+
+        # Create custom z-ticks to show true values
+        num_ticks = 5  # You can adjust this number as needed
+        z_ticks = np.linspace(z_min, z_max, num_ticks)
+        ax.set_zticks(z_ticks * z_scale)
+        ax.set_zticklabels([f'{z:.0f}' for z in z_ticks])
+
+        # Set labels
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z (True Scale)')
+
+        # Control grid visibility
+        ax.grid(show_grid)
+
+        # Add a text annotation explaining the visual scaling
+        ax.text2D(0.05, 0.95, f'Visual Z-Scale: {z_scale}', transform=ax.transAxes)
+
     plt.show()
 
 
