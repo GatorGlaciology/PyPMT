@@ -1795,9 +1795,9 @@ def greenland_bounds():
     fig = plt.figure(figsize=(10, 10))
     map_proj = ccrs.Orthographic(central_longitude=-45.0, central_latitude=70.0)
     ax = fig.add_subplot(1, 1, 1, projection=map_proj)
-    ax.set_extent([-74, -11, 59, 83], ccrs.PlateCarree())  # Adjust the extent as needed
-    ax.add_feature(cfeature.COASTLINE)
-    ax.add_feature(cfeature.BORDERS)
+    ax.set_extent([-74, -11, 59, 83], ccrs.PlateCarree())
+    ax.add_feature(cfeature.COASTLINE.with_scale('10m'))
+    ax.add_feature(cfeature.BORDERS.with_scale('10m'))
     return ax
 
 
