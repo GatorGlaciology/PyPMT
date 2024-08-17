@@ -1,0 +1,32 @@
+# .readthedocs.yaml
+
+version: 2
+
+# Build documentation in the 'docs' directory using Sphinx
+sphinx:
+  configuration: docs/conf.py
+
+# Set the Python version for the virtual environment
+python:
+  version: 3.8
+  install:
+    - requirements: requirements.txt
+
+# If you don't have a requirements.txt, you can specify the dependencies directly
+# install:
+#   - method: pip
+#     path: .
+
+# Build documentation from notebooks (optional)
+notebooks:
+  execute: false  # Set to true if you want to execute notebooks during the build
+
+# Specify any additional commands or environments needed for your documentation
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.8"
+
+# HTML files are usually ignored, but you can include them by specifying them
+include:
+  - "*.html"
