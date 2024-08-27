@@ -1,28 +1,28 @@
 version: 2
 
-# Build documentation using Sphinx
-sphinx:
-  configuration: docs/conf.py
+# Build configuration
+build:
+  os: ubuntu-22.04  # Specify the operating system
 
-# Set the Python version for the virtual environment
+# Python configuration
 python:
-  version: 3.8
+  version: "3.8"  # Specify the Python version
   install:
     - method: pip
       path: .
 
-# If you need to specify the build environment, add this section
-build:
-  os: ubuntu-22.04
+# Sphinx configuration
+sphinx:
+  configuration: docs/conf.py
 
 # Include only specific files in the build process
 include:
-  - "PyPMT.py"  # Replace with the relative path to your .py file
+  - "PyPMT.py"  # Ensure this is the correct relative path to your .py file
   - ".readthedocs.yaml"
 
 # Exclude unnecessary files from the build
 exclude:
   - "*.ipynb"          # Exclude Jupyter notebooks
   - "*.html"           # Exclude HTML files
-  - "*.xlsx" # Exclude xlsx files
-  - "*.md" # Exclude .md files
+  - "*.xlsx"           # Exclude xlsx files
+  - "*.md"             # Exclude .md files
