@@ -11,6 +11,12 @@ python:
     - method: pip
       path: .
 
+# If you need to specify the build environment, add this section
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.8"
+
 # Include only specific files in the build process
 include:
   - "PyPMT.py"  # Replace with the relative path to your .py file
