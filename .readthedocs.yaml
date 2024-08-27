@@ -17,16 +17,6 @@ python:
 #   - method: pip
 #     path: .
 
-# Build documentation from notebooks (optional)
-notebooks:
-  execute: false  # Set to true if you want to execute notebooks during the build
-
-# Specify any additional commands or environments needed for your documentation
-build:
-  os: ubuntu-22.04
-  tools:
-    python: "3.8"
-
-# HTML files are usually ignored, but you can include them by specifying them
 include:
-  - "*.html"
+  - "PyPMT.py"
+  - ".readthedocs.yaml
