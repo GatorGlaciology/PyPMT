@@ -1,8 +1,6 @@
-# .readthedocs.yaml
-
 version: 2
 
-# Build documentation in the 'docs' directory using Sphinx
+# Build documentation using Sphinx
 sphinx:
   configuration: docs/conf.py
 
@@ -10,13 +8,17 @@ sphinx:
 python:
   version: 3.8
   install:
-    - requirements: requirements.txt
+    - method: pip
+      path: .
 
-# If you don't have a requirements.txt, you can specify the dependencies directly
-# install:
-#   - method: pip
-#     path: .
-
+# Include only specific files in the build process
 include:
-  - "PyPMT.py"
-  - ".readthedocs.yaml
+  - "PyPMT.py"  # Replace with the relative path to your .py file
+  - ".readthedocs.yaml"
+
+# Exclude unnecessary files from the build
+exclude:
+  - "*.ipynb"          # Exclude Jupyter notebooks
+  - "*.html"           # Exclude HTML files
+  - "*.xlsx" # Exclude xlsx files
+  - "*.md" # Exclude .md files
