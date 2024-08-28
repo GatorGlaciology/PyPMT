@@ -1868,6 +1868,24 @@ def graticule_ps(lats=None, lons=None, clipping=False, ax=None, **kwargs):
 
 
 def text_ps(lat, lon, string, plot_km=False, **kwargs):
+    """
+            Places georeferenced text labels in polar stereographic cartesian coordinates
+
+            Parameters
+            ----------
+            lat : int, float
+                Specifies line of latitude.
+            lon : int, float
+                Specifies line of longitude.
+            string : string
+                The desired text to place on the plot.
+            plot_km : bool, optional
+
+            Returns
+            -------
+            h : Matplotlib GeoAxesSubplot
+            Matplotlib GeoAxesSubplot object with the added text.
+            """
     # Convert lat, lon to polar stereographic coordinates
     x, y = ll2ps(lat, lon)
 
