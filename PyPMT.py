@@ -12,7 +12,6 @@ from pyproj import Transformer
 from scipy.interpolate import interp1d
 from shapely import MultiPoint
 from shapely.geometry import LineString
-from matplotlib.patches import Polygon, Circle
 import matplotlib.patches as mpatches
 import matplotlib.path as mpath
 import re
