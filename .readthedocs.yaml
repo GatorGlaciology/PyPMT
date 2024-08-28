@@ -1,32 +1,28 @@
-# .readthedocs.yaml
-
 version: 2
 
-# Build documentation in the 'docs' directory using Sphinx
+# Build configuration
+build:
+  os: ubuntu-22.04  # Specify the operating system
+
+# Python configuration
+python:
+  version: "3.8"  # Specify the Python version
+  install:
+    - method: pip
+      path: .
+
+# Sphinx configuration
 sphinx:
   configuration: docs/conf.py
 
-# Set the Python version for the virtual environment
-python:
-  version: 3.8
-  install:
-    - requirements: requirements.txt
-
-# If you don't have a requirements.txt, you can specify the dependencies directly
-# install:
-#   - method: pip
-#     path: .
-
-# Build documentation from notebooks (optional)
-notebooks:
-  execute: false  # Set to true if you want to execute notebooks during the build
-
-# Specify any additional commands or environments needed for your documentation
-build:
-  os: ubuntu-22.04
-  tools:
-    python: "3.8"
-
-# HTML files are usually ignored, but you can include them by specifying them
+# Include only specific files in the build process
 include:
-  - "*.html"
+  - "PyPMT.py"  # Ensure this is the correct relative path to your .py file
+  - ".readthedocs.yaml"
+
+# Exclude unnecessary files from the build
+exclude:
+  - "*.ipynb"          # Exclude Jupyter notebooks
+  - "*.html"           # Exclude HTML files
+  - "*.xlsx"           # Exclude xlsx files
+  - "*.md"             # Exclude .md files
