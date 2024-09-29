@@ -19,6 +19,8 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.geodesic import Geodesic
 from cartopy.feature import NaturalEarthFeature
+from pathlib import Path
+import geopandas as gpd
 
 # In[ ]:
 
@@ -1335,15 +1337,18 @@ def ant_bounds():
         Matplotlib GeoAxesSubplot object with the Antarctic map.
     """
 
-    fig, ax = plt.subplots(figsize=(10, 10),
-                           subplot_kw={'projection': ccrs.Stereographic(central_longitude=0, central_latitude=-90)})
-    ax.set_extent([-180, 180, -90, -60], ccrs.PlateCarree())
-    ax.coastlines(resolution='10m', color='black', linewidth=1.0)
-
-    # Add ice shelves as a NaturalEarthFeature
-    ice_shelves = NaturalEarthFeature(category='physical', name='antarctic_ice_shelves_polys', scale='10m')
-    ax.add_feature(ice_shelves, facecolor='lightblue', edgecolor='black', linewidth=1.0, zorder=1)
-
+    moa_coast = gpd.read_file(Path('/data/moa2014_coastline_v01.shp'))
+    moa_gl = gpd.read_file(Path('/data/moa2014_grounding_line_v01.shp'))
+    moa_islands = gpd.read_file(Path('/data/moa2014_islands_v01.shp'))
+    polar = ccrs.SouthPolarStereo(true_scale_latitude=-71)
+    fig, ax = plt.subplots(1, 1, figsize=(8, 8), subplot_kw=dict(projection=polar))
+    ax.add_geometries(moa_coast.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='lightblue',
+                      edgecolor='k')
+    ax.add_geometries(moa_gl.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='white', edgecolor='k')
+    ax.add_geometries(moa_islands.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='white',
+                      edgecolor='k')
+    ax.set_xlim([-3.3e6, 3.3e6])
+    ax.set_ylim([-3.3e6, 3.3e6])
     return ax
 
 
