@@ -1352,10 +1352,11 @@ def ant_bounds():
     polar = ccrs.SouthPolarStereo(true_scale_latitude=-71)
     fig, ax = plt.subplots(1, 1, figsize=(8, 8), subplot_kw=dict(projection=polar))
     ax.add_geometries(moa_coast.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='lightblue',
-                      edgecolor='k')
-    ax.add_geometries(moa_gl.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='white', edgecolor='k')
+                      edgecolor='k', zorder=1)
+    ax.add_geometries(moa_gl.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='white',
+                      edgecolor='k', zorder=1)
     ax.add_geometries(moa_islands.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='white',
-                      edgecolor='k')
+                      edgecolor='k', zorder=1)
     ax.set_xlim([-3.3e6, 3.3e6])
     ax.set_ylim([-3.3e6, 3.3e6])
     return ax
