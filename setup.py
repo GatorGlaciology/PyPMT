@@ -16,7 +16,9 @@ dependencies = [
     'numpy>=2.0.1',
     'pyproj>=3.5.0',
     'scipy>=1.14.0',
-    'Shapely>=2.0.5,
+    'Shapely>=2.0.5',
+    'geopandas>=0.10.0',
+    'pathlib; python_version<"3.4"',
 ]
 
 with open('README.md', 'r') as f:
