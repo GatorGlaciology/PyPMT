@@ -284,10 +284,10 @@ def ll2ps(lat, lon, **kwargs):
     lambda_0 = kwargs.get('meridian', 0)
 
     # Convert degrees to radians
-    lat_rad = np.deg_2_rad(lat)
-    lon_rad = np.deg_2_rad(lon)
-    lambda_0_rad = np.deg_2_rad(lambda_0)
-    phi_c_rad = np.deg_2_rad(phi_c)
+    lat_rad = np.deg2rad(lat)
+    lon_rad = np.deg2rad(lon)
+    lambda_0_rad = np.deg2rad(lambda_0)
+    phi_c_rad = np.deg2rad(phi_c)
 
     # Calculate m and t values
     m_c = np.cos(phi_c_rad) / np.sqrt(1 - e ** 2 * (np.sin(phi_c_rad) ** 2))
@@ -911,7 +911,7 @@ def uv2vxvy(lat_or_x, lon_or_y, u, v):
         _, lon = ps2ll(lat_or_x, lon_or_y)
 
     # Convert lon to radians
-    lon_rad = np.deg_2_rad(lon)
+    lon_rad = np.deg2rad(lon)
 
     # Perform calculation
     vx = u * np.cos(lon_rad) + v * np.sin(lon_rad)
