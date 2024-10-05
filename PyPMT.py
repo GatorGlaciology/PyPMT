@@ -38,11 +38,16 @@ def load_csv_data(file_name):
     -------
         numpy.ndarrays for latitude, longitude, and location names
     """
+
+    # Resolve the path relative to the current file's location
+    data_dir = Path(__file__).resolve().parent / 'data'
+    file_path = data_dir / file_name
+
     lat = []
     lon = []
     names = []
 
-    with open(file_name, 'r', encoding='utf-8') as csvfile:
+    with open(file_path, 'r', encoding='utf-8') as csvfile:
         csvreader = csv.reader(csvfile)
         next(csvreader)  # Skip header row
 
