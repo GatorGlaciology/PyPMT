@@ -1337,9 +1337,13 @@ def ant_bounds():
         Matplotlib GeoAxesSubplot object with the Antarctic map.
     """
 
-    moa_coast = gpd.read_file(Path('/data/moa2014_coastline_v01.shp'))
-    moa_gl = gpd.read_file(Path('/data/moa2014_grounding_line_v01.shp'))
-    moa_islands = gpd.read_file(Path('/data/moa2014_islands_v01.shp'))
+    # Use the relative path based on the current script's directory
+    data_dir = Path(__file__).resolve().parent / 'data'
+
+    # Read shapefiles from the data folder
+    moa_coast = gpd.read_file(data_dir / 'moa2014_coastline_v01.shp')
+    moa_gl = gpd.read_file(data_dir / 'moa2014_grounding_line_v01.shp')
+    moa_islands = gpd.read_file(data_dir / 'moa2014_islands_v01.shp')
     polar = ccrs.SouthPolarStereo(true_scale_latitude=-71)
     fig, ax = plt.subplots(1, 1, figsize=(8, 8), subplot_kw=dict(projection=polar))
     ax.add_geometries(moa_coast.geometry, ccrs.SouthPolarStereo(true_scale_latitude=-71), facecolor='lightblue',
