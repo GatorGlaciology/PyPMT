@@ -311,9 +311,9 @@ def ll2ps(lat, lon, **kwargs):
         elif key.lower() == 'meridian':
             lambda_0 = value
             if not isinstance(lambda_0, (int, float)):
-                raise ValueError('meridian must be a scalar.')
+                raise ValueError('Meridian must be a scalar.')
             if lambda_0 < -180 or lambda_0 > 360:
-                raise ValueError('meridian does not seem like a logical value.')
+                raise ValueError('Meridian does not seem like a logical value.')
         else:
             print("At least one of your input arguments is invalid. Please try again.")
             return 0
@@ -378,16 +378,22 @@ def ps2ll(x, y, **kwargs):
                 phi_c = -phi_c
         elif key.lower() == 'earth_radius':
             a = value
-            assert isinstance(a, (int, float)), 'Earth radius must be a scalar.'
-            assert a > 7e+3, 'Earth radius should be something like 6378137 in kilometers.'
+            if not isinstance(a, (int, float)):
+                raise ValueError('Earth radius must be a scalar.')
+            if a < 7e+3:
+                raise ValueError('Earth radius should be something like 6378137 in kilometers.')
         elif key.lower() == 'eccentricity':
             e = value
-            assert isinstance(e, (int, float)), 'Earth eccentricity must be a scalar.'
-            assert 0 <= e < 1, 'Earth eccentricity does not seem like a reasonable value.'
+            if not isinstance(e, (int, float)):
+                raise ValueError('Earth eccentricity must be a scalar.')
+            if e <= 0 or e > 1:
+                raise ValueError('Earth eccentricity does not seem like a reasonable value.')
         elif key.lower() == 'meridian':
             lambda_0 = value
-            assert isinstance(lambda_0, (int, float)), 'meridian must be a scalar.'
-            assert -180 <= lambda_0 <= 360, 'meridian does not seem like a logical value.'
+            if not isinstance(lambda_0, (int, float)):
+                raise ValueError('Meridian must be a scalar.')
+            if lambda_0 < -180 or lambda_0 > 360:
+                raise ValueError('Meridian does not seem like a logical value.')
         else:
             print("At least one of your input arguments is invalid. Please try again.")
             return 0
