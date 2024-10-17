@@ -283,6 +283,41 @@ def ll2ps(lat, lon, **kwargs):
     e = kwargs.get('Eccentricity', 0.08181919)
     lambda_0 = kwargs.get('meridian', 0)
 
+    if not is_lat_lon(lat, lon):
+        raise ValueError('Please verify your input latitude and longitude coordinates.')
+
+    # Parse optional keyword arguments
+    for key, value in kwargs.items():
+        if key.lower() == 'true_lat':
+            phi_c = value
+            if not np.isscalar(phi_c):
+                raise ValueError('True lat must be a scalar.')
+            """if phi_c > 0:
+                print("I'm assuming you forgot the negative sign for the true latitude, \
+                      and I am converting your northern hemisphere value to southern hemisphere.")
+                phi_c = -phi_c"""
+        elif key.lower() == 'earth_radius':
+            a = value
+            if not isinstance(a, (int, float)):
+                raise ValueError('Earth radius must be a scalar.')
+            if a < 7e+3:
+                raise ValueError('Earth radius should be something like 6378137 in kilometers.')
+        elif key.lower() == 'eccentricity':
+            e = value
+            if not isinstance(e, (int, float)):
+                raise ValueError('Earth eccentricity must be a scalar.')
+            if e < 0 or e >= 1:
+                raise ValueError('Earth eccentricity does not seem like a reasonable value.')
+        elif key.lower() == 'meridian':
+            lambda_0 = value
+            if not isinstance(lambda_0, (int, float)):
+                raise ValueError('meridian must be a scalar.')
+            if lambda_0 < -180 or lambda_0 > 360:
+                raise ValueError('meridian does not seem like a logical value.')
+        else:
+            print("At least one of your input arguments is invalid. Please try again.")
+            return 0
+
     # Convert degrees to radians
     lat_rad = np.deg2rad(lat)
     lon_rad = np.deg2rad(lon)
@@ -420,7 +455,8 @@ def is_lat_lon(lat, lon):
     """
 
     if not (isinstance(lat, np.ndarray) and isinstance(lon, np.ndarray)):
-        raise ValueError("Input lat and lon must be numpy arrays.")
+        lat = np.ndarray(lat)
+        lon = np.ndarray(lon)
     
     if not np.all(np.isnan(lat) == False):
         return False
