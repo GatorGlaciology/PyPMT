@@ -278,10 +278,10 @@ def ll2ps(lat, lon, **kwargs):
             calculated y coordinate(S)
     """
     # Set default values
-    phi_c = kwargs.get('TrueLat', -71)
-    a = kwargs.get('EarthRadius', 6378137.0)
-    e = kwargs.get('Eccentricity', 0.08181919)
-    lambda_0 = kwargs.get('meridian', 0)
+    phi_c = -71
+    a = 6378137.0
+    e = 0.08181919
+    lambda_0 = 0
 
     if not is_lat_lon(lat, lon):
         raise ValueError('Please verify your input latitude and longitude coordinates.')
