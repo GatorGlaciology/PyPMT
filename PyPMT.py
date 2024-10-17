@@ -1374,9 +1374,14 @@ def inter_x(L1, L2):
         return intersections
 
 
-def ant_bounds():
+def ant_bounds(show_ticks=False):
     """
     Creates a polar stereographic map of the Antarctic region with coastlines and ice shelves.
+
+    Parameters
+        ----------
+        show_ticks : bool, optional
+            Adds ticks and axes to the plot.
 
     Returns
     -------
@@ -1401,6 +1406,15 @@ def ant_bounds():
                       edgecolor='k', zorder=1)
     ax.set_xlim([-3.3e6, 3.3e6])
     ax.set_ylim([-3.3e6, 3.3e6])
+
+    # Add ticks if show_ticks is True
+    if show_ticks:
+        ax.set_xticks([-3e6, -1.5e6, 0, 1.5e6, 3e6], crs=polar)
+        ax.set_yticks([-3e6, -1.5e6, 0, 1.5e6, 3e6], crs=polar)
+        # Set axis labels
+        ax.set_xlabel("Easting (m)", labelpad=15)
+        ax.set_ylabel("Northing (m)", labelpad=15)
+
     return ax
 
 
