@@ -336,7 +336,7 @@ def ll2ps(lat, lon, **kwargs):
     x = rho * np.sin(lon_rad - lambda_0_rad)
     y = rho * np.cos(lon_rad - lambda_0_rad)
 
-    return x, y
+    return np.round(x, 4), np.round(y, 4)
 
 
 # In[ ]:
