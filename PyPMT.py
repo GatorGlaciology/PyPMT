@@ -372,10 +372,10 @@ def ps2ll(x, y, **kwargs):
             phi_c = value
             if not np.isscalar(phi_c):
                 raise ValueError('True lat must be a scalar.')
-            if phi_c > 0:
+            """if phi_c > 0:
                 print("I'm assuming you forgot the negative sign for the true latitude, \
                       and I am converting your northern hemisphere value to southern hemisphere.")
-                phi_c = -phi_c
+                phi_c = -phi_c"""
         elif key.lower() == 'earth_radius':
             a = value
             if not isinstance(a, (int, float)):
