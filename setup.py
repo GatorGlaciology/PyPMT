@@ -38,4 +38,5 @@ setup(
     py_modules = ['PyPMT'],
     python_requires = '>=3',
     install_requires = dependencies,
+    include_package_data=True,
 )
