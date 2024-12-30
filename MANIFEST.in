@@ -1,4 +1,4 @@
 include README.md
 include LICENSE
-include data/*
-include demos/*
+recursive-include data *
+recursive-include demos *
