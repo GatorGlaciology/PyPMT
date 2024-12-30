@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0.9'
+version = '1.0.8'
 
 classifiers = [
     'Programming Language :: Python :: 3',
@@ -18,6 +18,7 @@ dependencies = [
     'scipy>=1.14.0',
     'Shapely>=2.0.5',
     'geopandas>=0.10.0',
+    'pathlib; python_version<"3.4"',
 ]
 
 with open('README.md', 'r') as f:
@@ -34,8 +35,11 @@ setup(
     url='https://github.com/GatorGlaciology/PyPMT',
     license='MIT',
     classifiers=classifiers,
-    packages=find_packages(),
+    packages=find_packages(),  # Ensure this includes your PyPMT package
     python_requires='>=3',
     install_requires=dependencies,
     include_package_data=True,
+    package_data={
+        'PyPMT': ['data/*'],  # Ensure this includes the data files in the PyPMT package
+    },
 )
