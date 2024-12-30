@@ -1,6 +1,6 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-version = '1.0.8'
+version = '1.0.9'
 
 classifiers = [
     'Programming Language :: Python :: 3',
@@ -18,25 +18,24 @@ dependencies = [
     'scipy>=1.14.0',
     'Shapely>=2.0.5',
     'geopandas>=0.10.0',
-    'pathlib; python_version<"3.4"',
 ]
 
 with open('README.md', 'r') as f:
     readme = f.read()
 
 setup(
-    name = 'PyPMT',
-    version = version,
-    description = 'Python package for analysis and visualization of polar datasets.',
-    long_description = readme,
-    long_description_content_type = 'text/markdown',
-    author = 'Blake Wood',
-    author_email = 'blakewood1@ufl.edu',
-    url = 'https://github.com/GatorGlaciology/PyPMT',
-    license = 'MIT',
-    classifiers = classifiers,
-    py_modules = ['PyPMT'],
-    python_requires = '>=3',
-    install_requires = dependencies,
+    name='PyPMT',
+    version=version,
+    description='Python package for analysis and visualization of polar datasets.',
+    long_description=readme,
+    long_description_content_type='text/markdown',
+    author='Blake Wood',
+    author_email='blakewood1@ufl.edu',
+    url='https://github.com/GatorGlaciology/PyPMT',
+    license='MIT',
+    classifiers=classifiers,
+    packages=find_packages(),
+    python_requires='>=3',
+    install_requires=dependencies,
     include_package_data=True,
 )
