@@ -18,3 +18,5 @@ build/
 # Logs and temporary files
 *.log
 *.tmp
+*.swp
+*.iml
