@@ -18,9 +18,9 @@ import re
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from cartopy.geodesic import Geodesic
-from cartopy.feature import NaturalEarthFeature
 from pathlib import Path
 import geopandas as gpd
+from importlib.resources import files
 
 # In[ ]:
 
@@ -1390,7 +1390,7 @@ def ant_bounds(show_ticks=False):
     """
 
     # Use the relative path based on the current script's directory
-    data_dir = Path(__file__).resolve().parent / 'data'
+    data_dir = files("PyPMT.data")
 
     # Read shapefiles from the data folder
     moa_coast = gpd.read_file(data_dir / 'moa2014_coastline_v01.shp')
