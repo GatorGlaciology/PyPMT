@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = '1.0.9'
+version = '1.0.10'
 
 classifiers = [
     'Programming Language :: Python :: 3',
@@ -40,6 +40,6 @@ setup(
     install_requires=dependencies,
     include_package_data=True,
     package_data={
-        'PyPMT': ['data/*'],  # Ensure this includes the data files in the PyPMT package
+        'PyPMT.data': ['*.shp', '*.shx', '*.dbf', '*.cpg', '*.prj'],  # Specify shapefile components
     },
 )
