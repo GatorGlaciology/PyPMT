@@ -449,33 +449,33 @@ def is_lat_lon(lat, lon):
 
     Parameters
     ----------
-        lat : numpy ndarray
-            array of latitude coordinates
-        lon : numpy ndarray
-            array of longitude coordinates
+        lat : numpy ndarray or convertible to numpy ndarray
+            Latitude coordinate(s)
+        lon : numpy ndarray or convertible to numpy ndarray
+            Longitude coordinate(s)
 
     Returns
     -------
         bool: True if all values in lat are numeric between -90 and 90 inclusive,
          and all values in lon are numeric between -180 and 360 inclusive. False otherwise.
     """
+    # Convert lat and lon to NumPy arrays if they are not already
+    if not isinstance(lat, np.ndarray):
+        lat = np.array(lat)
+    if not isinstance(lon, np.ndarray):
+        lon = np.array(lon)
 
-    if not (isinstance(lat, np.ndarray) and isinstance(lon, np.ndarray)):
-        lat = np.ndarray(lat)
-        lon = np.ndarray(lon)
-    
-    if not np.all(np.isnan(lat) == False):
+    # Check for NaN values
+    if np.any(np.isnan(lat)) or np.any(np.isnan(lon)):
         return False
-    
-    if not np.all(np.isnan(lon) == False):
-        return False
-    
+
+    # Validate ranges for latitude and longitude
     if not (np.all(lat >= -90) and np.all(lat <= 90)):
         return False
-    
+
     if not (np.all(lon >= -180) and np.all(lon <= 360)):
         return False
-    
+
     return True
 
 
